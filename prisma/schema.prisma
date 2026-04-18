@@ -1,0 +1,101 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum TournamentStatus {
+  UPCOMING
+  PICKS_OPEN
+  PICKS_LOCKED
+  COMPLETED
+}
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  password      String
+  role          Role      @default(USER)
+  createdAt     DateTime  @default(now())
+  lastLoginAt   DateTime?
+  entries       Entry[]
+}
+
+model Tournament {
+  id            String            @id @default(cuid())
+  name          String
+  year          Int
+  status        TournamentStatus  @default(UPCOMING)
+  startDate     DateTime
+  pegttourSlug            String?
+  scoresLastCalculatedAt  DateTime?
+  createdAt               DateTime          @default(now())
+  groups                  Group[]
+  entries                 Entry[]
+}
+
+model Group {
+  id           String      @id @default(cuid())
+  tournamentId String
+  groupNumber  Int         // 1-8
+  tournament   Tournament  @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  golfers      Golfer[]
+  picks        Pick[]
+
+  @@unique([tournamentId, groupNumber])
+}
+
+model Golfer {
+  id                    String   @id @default(cuid())
+  groupId               String
+  name                  String
+  hdcp                  Float?
+  qualifyingRank        Int?
+  qualifyingBracket     String?
+  finalPosition         Int?
+  bonusTopQualifier     Int?
+  bonusCoursesWon       Int?
+  coursesWon            String[]
+  bonusTopFinisher      Int?
+  bonusMainBracket      Int?
+  bonusPurple           Int?
+  bonusPink             Int?
+  finalScore            Float?
+  group                 Group    @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  picks                 Pick[]
+}
+
+model Entry {
+  id           String     @id @default(cuid())
+  userId       String?    // null for historical entries not yet linked to a user account
+  tournamentId String
+  entryName    String     // e.g. "Team Alpha", allows multiple entries per user
+  totalPoints  Float?     // calculated after tournament
+  paidAt        DateTime?  // set when admin marks entry as paid
+  disqualified  Boolean    @default(false) // true if a picked golfer did not play
+  createdAt     DateTime   @default(now())
+  user         User?      @relation(fields: [userId], references: [id], onDelete: SetNull)
+  tournament   Tournament @relation(fields: [tournamentId], references: [id], onDelete: Cascade)
+  picks        Pick[]
+}
+
+model Pick {
+  id       String  @id @default(cuid())
+  entryId  String
+  groupId  String
+  golferId String
+  entry    Entry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  group    Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  golfer   Golfer  @relation(fields: [golferId], references: [id], onDelete: Cascade)
+
+  @@unique([entryId, groupId]) // one pick per group per entry
+}
