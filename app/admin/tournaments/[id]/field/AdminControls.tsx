@@ -58,73 +58,70 @@ export default function AdminControls({
   }
 
   return (
-    <div className="flex flex-wrap items-end gap-6 mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
-      {/* Status dropdown */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-          Status
-        </label>
-        <div className="flex gap-2">
-          <select
-            value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
-          >
-            {STATUSES.map((s) => (
-              <option key={s} value={s}>
-                {s.replace("_", " ")}
-              </option>
-            ))}
-          </select>
-          <button
-            onClick={handleStatusSave}
-            disabled={statusSaving}
-            className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-50"
-          >
-            {statusSaving ? "Saving..." : "Update"}
-          </button>
-        </div>
-      </div>
+    <div className="mb-8 p-4 bg-gray-50 rounded-xl border border-gray-200">
+      <div className="flex flex-wrap items-center gap-3">
+        {/* Status dropdown */}
+        <select
+          value={status}
+          onChange={(e) => setStatus(e.target.value)}
+          className="border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-green-500"
+        >
+          {STATUSES.map((s) => (
+            <option key={s} value={s}>
+              {s.replace("_", " ")}
+            </option>
+          ))}
+        </select>
+        <button
+          onClick={handleStatusSave}
+          disabled={statusSaving}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-50"
+        >
+          {statusSaving ? "Saving..." : "Update"}
+        </button>
 
-      {/* View Entries */}
-      <div>
-        <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-          Entries
-        </label>
         <Link
           href={`/admin/tournaments/${tournament.id}/entries`}
           className="inline-block bg-purple-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-purple-700 transition"
         >
           View Entries
         </Link>
+
+        <Link
+          href={`/admin/tournaments/${tournament.id}/payments`}
+          className="inline-block bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition"
+        >
+          Manage Payments
+        </Link>
+
+        <Link
+          href={`/admin/tournaments/${tournament.id}/finances`}
+          className="inline-block bg-amber-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-amber-700 transition"
+        >
+          Finances
+        </Link>
+
+        {tournament.pegttourSlug && (
+          <button
+            onClick={handleCalculate}
+            disabled={calculating}
+            className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition disabled:opacity-50"
+          >
+            {calculating ? "Fetching from PEGT..." : "Calculate Results"}
+          </button>
+        )}
       </div>
 
-      {/* Calculate Results button */}
-      {tournament.pegttourSlug && (
-        <div>
-          <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-            Results
-          </label>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleCalculate}
-              disabled={calculating}
-              className="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition disabled:opacity-50"
-            >
-              {calculating ? "Fetching from PEGT..." : "Calculate Results"}
-            </button>
-            {lastCalculated && (
-              <span className="text-xs text-gray-400">
-                Last run: {new Date(lastCalculated).toLocaleString()}
-              </span>
-            )}
-          </div>
-        </div>
+      {/* Timestamp below the button row */}
+      {tournament.pegttourSlug && lastCalculated && (
+        <p className="text-xs text-gray-400 mt-2">
+          Last calculated: {new Date(lastCalculated).toLocaleString()}
+        </p>
       )}
 
       {/* Feedback messages */}
       {(message || error) && (
-        <div className="w-full">
+        <div className="mt-2">
           {message && <p className="text-sm text-green-700">{message}</p>}
           {error && <p className="text-sm text-red-600">{error}</p>}
         </div>

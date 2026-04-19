@@ -31,6 +31,7 @@ export default function UserManager({ initialUsers }: { initialUsers: User[] }) 
   const [resetPassword, setResetPassword] = useState("");
   const [showResetPassword, setShowResetPassword] = useState(false);
 
+  const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
   const [showCreatePassword, setShowCreatePassword] = useState(false);
@@ -239,7 +240,112 @@ export default function UserManager({ initialUsers }: { initialUsers: User[] }) 
         )}
       </div>
 
-      <div className="rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+      {/* Mobile: accordion cards */}
+      <div className="sm:hidden flex flex-col divide-y divide-gray-200 rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        {users.map((user, i) => {
+          const isOpen = expandedUserId === user.id;
+          return (
+            <div key={user.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
+              <button
+                className="w-full flex items-center justify-between px-4 py-3 text-left"
+                onClick={() => setExpandedUserId(isOpen ? null : user.id)}
+              >
+                <div>
+                  <div className="font-medium text-gray-800 text-sm">{user.name}</div>
+                  <div className="text-xs text-gray-400">{user.email}</div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+                    user.role === "ADMIN" ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-500"
+                  }`}>{user.role}</span>
+                  <span className={`text-gray-400 text-xs transition-transform ${isOpen ? "rotate-180" : ""}`}>▼</span>
+                </div>
+              </button>
+              {isOpen && (
+                <div className="px-4 pb-4 space-y-3 border-t border-gray-100">
+                  <div className="grid grid-cols-2 gap-2 pt-3 text-xs text-gray-500">
+                    <div><span className="font-semibold">Entries:</span> {user._count.entries}</div>
+                    <div><span className="font-semibold">Last Login:</span><br />{formatLastLogin(user.lastLoginAt)}</div>
+                  </div>
+                  <div className="flex flex-wrap gap-2 pt-1">
+                    <button
+                      onClick={() => toggleRole(user)}
+                      disabled={loadingId === user.id}
+                      className="text-xs bg-blue-50 text-blue-600 border border-blue-200 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                    >
+                      {user.role === "ADMIN" ? "Remove Admin" : "Make Admin"}
+                    </button>
+                    <button
+                      onClick={() => {
+                        setResetUserId(resetUserId === user.id ? null : user.id);
+                        setResetPassword("");
+                        setShowResetPassword(false);
+                      }}
+                      disabled={loadingId === user.id}
+                      className="text-xs bg-yellow-50 text-yellow-600 border border-yellow-200 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                    >
+                      Reset Password
+                    </button>
+                    <button
+                      onClick={() => deleteUser(user)}
+                      disabled={loadingId === user.id}
+                      className="text-xs bg-red-50 text-red-500 border border-red-200 px-3 py-1.5 rounded-lg disabled:opacity-50"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                  {resetUserId === user.id && (
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <input
+                          type={showResetPassword ? "text" : "password"}
+                          placeholder="New password"
+                          value={resetPassword}
+                          onChange={(e) => setResetPassword(e.target.value)}
+                          className="w-full border border-gray-300 rounded px-2 py-1.5 pr-8 text-sm focus:outline-none focus:ring-1 focus:ring-yellow-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowResetPassword((v) => !v)}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400"
+                          tabIndex={-1}
+                        >
+                          {showResetPassword ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" />
+                            </svg>
+                          ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                          )}
+                        </button>
+                      </div>
+                      <button
+                        onClick={() => submitResetPassword(user)}
+                        disabled={!resetPassword || loadingId === user.id}
+                        className="text-xs bg-yellow-500 text-white px-3 py-1.5 rounded-lg hover:bg-yellow-600 disabled:opacity-50"
+                      >
+                        Save
+                      </button>
+                      <button
+                        onClick={() => { setResetUserId(null); setResetPassword(""); setShowResetPassword(false); }}
+                        className="text-xs text-gray-400 hover:text-gray-600"
+                      >
+                        ✕
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Desktop: full table */}
+      <div className="hidden sm:block rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 border-b-2 border-gray-300 text-xs font-semibold text-gray-500 uppercase tracking-wide">

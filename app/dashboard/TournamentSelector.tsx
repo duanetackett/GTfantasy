@@ -73,7 +73,7 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
       <div className="bg-purple-600/25 border-b border-purple-400/40 px-6 py-3 text-center rounded-t-xl">
         <p className="text-white text-base font-bold uppercase tracking-widest">View Past Tournaments</p>
       </div>
-      <div className="px-6 py-6 flex flex-col sm:flex-row gap-6 items-start sm:items-end justify-center">
+      <div className="px-4 py-6 flex flex-row gap-3 items-end justify-center flex-wrap">
         {/* Year dropdown */}
         <div className="flex flex-col gap-1">
           <label className="text-sm font-semibold text-gray-300 uppercase tracking-wide text-center">

@@ -6,15 +6,18 @@ import AdminControls from "./AdminControls";
 
 export default async function FieldPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const tournament = await prisma.tournament.findUnique({
-    where: { id },
-    include: {
-      groups: {
-        orderBy: { groupNumber: "asc" },
-        include: { golfers: { orderBy: { name: "asc" } } },
+  const [tournament, picksCount] = await Promise.all([
+    prisma.tournament.findUnique({
+      where: { id },
+      include: {
+        groups: {
+          orderBy: { groupNumber: "asc" },
+          include: { golfers: { orderBy: { name: "asc" } } },
+        },
       },
-    },
-  });
+    }),
+    prisma.pick.count({ where: { entry: { tournamentId: id } } }),
+  ]);
 
   if (!tournament) notFound();
 
@@ -38,15 +41,13 @@ export default async function FieldPage({ params }: { params: Promise<{ id: stri
         }}
       />
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="mb-6">
         <p className="text-sm text-gray-300">Manage the field — 8 groups of 8 golfers</p>
-        <Link href={`/admin/tournaments/${tournament.id}/payments`} className="bg-red-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-red-700 transition">
-          Manage Payments
-        </Link>
       </div>
       <FieldEditor
         tournament={tournament}
         locked={tournament.status === "PICKS_LOCKED" || tournament.status === "COMPLETED"}
+        existingPicksCount={picksCount}
       />
     </div>
   );

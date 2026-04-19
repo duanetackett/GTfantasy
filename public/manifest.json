@@ -1,0 +1,21 @@
+{
+  "name": "GT Fantasy",
+  "short_name": "GT Fantasy",
+  "start_url": "/dashboard",
+  "display": "standalone",
+  "background_color": "#1d4ed8",
+  "theme_color": "#166534",
+  "icons": [
+    {
+      "src": "/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    },
+    {
+      "src": "/pegt-logo.png",
+      "sizes": "any",
+      "type": "image/png",
+      "purpose": "fallback"
+    }
+  ]
+}

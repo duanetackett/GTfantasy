@@ -3,69 +3,6 @@ import { prisma } from "@/lib/prisma";
 import { notFound, redirect } from "next/navigation";
 import LeaderboardTable from "./LeaderboardTable";
 
-// ─── Payout calculation ────────────────────────────────────────────────────────
-// Prize pool = qualifying entries × $35
-// Last place = $40 flat (per tied entry)
-// Remaining pool → 1st 40% / 2nd 30% / 3rd 20% / 4th 10% (ties split combined %)
-// DQ entries → $40 refund
-
-type EntryLike = { id: string; totalPoints: number | null; disqualified: boolean };
-
-function calculatePayouts(entries: EntryLike[]): Record<string, number> {
-  const payouts: Record<string, number> = {};
-
-  // DQ entries get $40 refund
-  for (const e of entries.filter((e) => e.disqualified)) {
-    payouts[e.id] = 40;
-  }
-
-  const scored = entries.filter((e) => !e.disqualified && e.totalPoints !== null);
-  if (scored.length === 0) return payouts;
-
-  const prizePool = scored.length * 35;
-
-  // Sort ascending (lower = better)
-  const sorted = [...scored].sort((a, b) => (a.totalPoints ?? 999) - (b.totalPoints ?? 999));
-
-  // Last place: worst score
-  const worstScore = sorted[sorted.length - 1].totalPoints!;
-  const lastPlaceEntries = sorted.filter((e) => e.totalPoints === worstScore);
-  const lastPlacePayout = 40; // flat $40 each
-  for (const e of lastPlaceEntries) {
-    payouts[e.id] = lastPlacePayout;
-  }
-
-  // Remaining pool for places 1–4
-  const remaining = prizePool - lastPlacePayout * lastPlaceEntries.length;
-  const percentages = [0.40, 0.30, 0.20, 0.10];
-
-  // Build ordered score groups (ascending)
-  const groups: EntryLike[][] = [];
-  let i = 0;
-  while (i < sorted.length) {
-    const score = sorted[i].totalPoints;
-    const group = sorted.filter((e) => e.totalPoints === score);
-    groups.push(group);
-    i += group.length;
-  }
-
-  // Assign top-4 payouts, splitting combined % among tied entries
-  let pos = 0;
-  for (const group of groups) {
-    if (pos >= 4) break;
-    const slots = percentages.slice(pos, pos + group.length);
-    const combined = slots.reduce((s, p) => s + p, 0);
-    const perEntry = Math.round((combined * remaining) / group.length);
-    for (const e of group) {
-      // Give the higher of top-4 payout vs last place consolation
-      payouts[e.id] = Math.max(payouts[e.id] ?? 0, perEntry);
-    }
-    pos += group.length;
-  }
-
-  return payouts;
-}
-
 // ─── Page ─────────────────────────────────────────────────────────────────────
 
 export default async function LeaderboardPage({ params }: { params: Promise<{ id: string }> }) {
@@ -105,8 +42,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
   const myEntries    = entries.filter((e) => e.user?.id === session.user.id);
   const scoresCalculated = tournament.status === "COMPLETED" && entries.some((e) => e.totalPoints !== null);
 
-  const payouts = scoresCalculated ? calculatePayouts(entries) : {};
-
   return (
     <div>
       <p className="text-sm text-gray-300 mb-6">
@@ -123,7 +58,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
             allEntries={activeEntries}
             groups={tournament.groups}
             scoresCalculated={scoresCalculated}
-            payouts={payouts}
             highlight
           />
           {myEntries.some((e) => e.disqualified) && (
@@ -132,7 +66,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
               allEntries={activeEntries}
               groups={tournament.groups}
               scoresCalculated={scoresCalculated}
-              payouts={payouts}
               highlight
               disqualified
             />
@@ -146,7 +79,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
         allEntries={activeEntries}
         groups={tournament.groups}
         scoresCalculated={scoresCalculated}
-        payouts={payouts}
         currentUserId={session.user.id}
       />
 
@@ -159,7 +91,6 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
             allEntries={activeEntries}
             groups={tournament.groups}
             scoresCalculated={scoresCalculated}
-            payouts={payouts}
             currentUserId={session.user.id}
             disqualified
           />

@@ -7,6 +7,7 @@ const geist = Geist({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Golden Tee Fantasy",
   description: "Fantasy league for Golden Tee tournaments",
+  manifest: "/manifest.json",
 };
 
 export default function RootLayout({

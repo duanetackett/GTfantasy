@@ -26,7 +26,6 @@ export default function LeaderboardTable({
   allEntries,
   groups,
   scoresCalculated,
-  payouts = {},
   highlight = false,
   currentUserId,
   disqualified = false,
@@ -35,7 +34,6 @@ export default function LeaderboardTable({
   allEntries: Entry[];
   groups: Group[];
   scoresCalculated: boolean;
-  payouts?: Record<string, number>;
   highlight?: boolean;
   currentUserId?: string;
   disqualified?: boolean;
@@ -55,8 +53,8 @@ export default function LeaderboardTable({
     return <p className="text-sm text-gray-400">No entries yet.</p>;
   }
 
-  // Number of visible columns on mobile: Rank + Player + Total + (Prize if scoresCalculated)
-  const mobileColSpan = scoresCalculated ? 4 : 3;
+  // Number of visible columns on mobile: Rank + Player + Total
+  const mobileColSpan = 3;
 
   return (
     <div className="overflow-x-auto rounded-xl border border-gray-200 shadow-sm">
@@ -66,7 +64,6 @@ export default function LeaderboardTable({
             <th className="text-center px-2 py-3 w-10 sticky left-0 bg-gray-100 z-10">Rank</th>
             <th className="text-center px-3 py-3 w-32 sticky left-10 bg-gray-100 z-10 shadow-[2px_0_4px_rgba(0,0,0,0.06)]">Player</th>
             <th className="text-center px-2 py-3 w-14 font-bold text-gray-700">Total</th>
-            {scoresCalculated && <th className="text-center px-2 py-3 w-16 text-green-700">Prize</th>}
             {groups.map((g, gIdx) => (
               <th key={g.id} className={`hidden sm:table-cell text-center px-1 py-3 w-24 ${GROUP_COLORS[gIdx % 2]}`}>G{g.groupNumber}</th>
             ))}
@@ -119,13 +116,6 @@ export default function LeaderboardTable({
                   <td className="text-center px-2 py-2 font-bold text-gray-900 align-middle">
                     {scoresCalculated && entry.totalPoints !== null ? entry.totalPoints : "—"}
                   </td>
-                  {scoresCalculated && (
-                    <td className="text-center px-2 py-2 align-middle">
-                      {payouts[entry.id] != null
-                        ? <span className="font-semibold text-green-600">${payouts[entry.id]}</span>
-                        : null}
-                    </td>
-                  )}
                   {groups.map((g, gIdx) => {
                     const pick = picksByGroup[g.groupNumber];
                     return (

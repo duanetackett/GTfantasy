@@ -7,19 +7,19 @@ type Golfer = { id: string; name: string; hdcp: number | null };
 type Group = { id: string; groupNumber: number; golfers: Golfer[] };
 type Tournament = { id: string; name: string; groups: Group[] };
 
-type GolferRow = { name: string; hdcp: string };
+type GolferRow = { id?: string; name: string; hdcp: string; pegtPlayerId?: number | null };
 
 function normalizeName(name: string) {
   return name.toLowerCase().trim().replace(/\s+/g, " ");
 }
 
 function isMatch(entered: string, players: string[]): boolean {
-  if (!entered.trim()) return true; // empty = not an error
+  if (!entered.trim()) return true;
   const n = normalizeName(entered);
   return players.some((p) => normalizeName(p) === n);
 }
 
-export default function FieldEditor({ tournament, locked = false }: { tournament: Tournament; locked?: boolean }) {
+export default function FieldEditor({ tournament, locked = false, existingPicksCount = 0 }: { tournament: Tournament; locked?: boolean; existingPicksCount?: number }) {
   const router = useRouter();
 
   const initGroups = (): GolferRow[][] => {
@@ -27,7 +27,7 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
     for (let g = 1; g <= 8; g++) {
       const existing = tournament.groups.find((gr) => gr.groupNumber === g);
       const rows: GolferRow[] = existing
-        ? existing.golfers.map((gf) => ({ name: gf.name, hdcp: gf.hdcp != null ? String(gf.hdcp) : "" }))
+        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name, hdcp: gf.hdcp != null ? String(gf.hdcp) : "" }))
         : [];
       while (rows.length < 8) rows.push({ name: "", hdcp: "" });
       result.push(rows);
@@ -40,14 +40,63 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
   const [message, setMessage] = useState("");
   const [validating, setValidating] = useState(false);
   const [players, setPlayers] = useState<string[] | null>(null);
+  const [playerIds, setPlayerIds] = useState<Record<string, number> | null>(null);
   const [validateError, setValidateError] = useState("");
 
-  function updateGolfer(groupIdx: number, golferIdx: number, field: keyof GolferRow, value: string) {
+  // Per-golfer inline edit state: golferId → { name, hdcp, saving, error }
+  const [inlineEdits, setInlineEdits] = useState<Record<string, { name: string; hdcp: string; saving: boolean; error: string }>>({});
+
+  function updateGolfer(groupIdx: number, golferIdx: number, field: "name" | "hdcp", value: string) {
     setGroups((prev) => {
       const next = prev.map((g) => g.map((row) => ({ ...row })));
       next[groupIdx][golferIdx][field] = value;
       return next;
     });
+  }
+
+  function startInlineEdit(golfer: GolferRow) {
+    if (!golfer.id) return;
+    setInlineEdits((prev) => ({
+      ...prev,
+      [golfer.id!]: { name: golfer.name, hdcp: golfer.hdcp, saving: false, error: "" },
+    }));
+  }
+
+  function cancelInlineEdit(golferId: string) {
+    setInlineEdits((prev) => {
+      const next = { ...prev };
+      delete next[golferId];
+      return next;
+    });
+  }
+
+  async function saveInlineEdit(golferId: string) {
+    const edit = inlineEdits[golferId];
+    if (!edit || !edit.name.trim()) return;
+
+    setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: true, error: "" } }));
+
+    const pegtId = playerIds?.[edit.name.toLowerCase().trim()] ?? null;
+
+    const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ golferId, name: edit.name, hdcp: edit.hdcp, pegtPlayerId: pegtId }),
+    });
+
+    const data = await res.json();
+    if (!res.ok) {
+      setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: false, error: data.error ?? "Failed to save." } }));
+    } else {
+      // Update local groups state with new name/hdcp
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.map((row) => (row.id === golferId ? { ...row, name: edit.name, hdcp: edit.hdcp } : row))
+        )
+      );
+      cancelInlineEdit(golferId);
+      router.refresh();
+    }
   }
 
   async function handleValidate() {
@@ -62,6 +111,7 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
       setValidateError(data.error ?? "Could not load player list.");
     } else {
       setPlayers(data.players);
+      setPlayerIds(data.playerIds ?? null);
     }
     setValidating(false);
   }
@@ -70,10 +120,19 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
     setSaving(true);
     setMessage("");
 
+    const groupsWithIds = playerIds
+      ? groups.map((g) =>
+          g.map((row) => ({
+            ...row,
+            pegtPlayerId: playerIds[row.name.toLowerCase().trim()] ?? null,
+          }))
+        )
+      : groups;
+
     const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ groups }),
+      body: JSON.stringify({ groups: groupsWithIds }),
     });
 
     const data = await res.json();
@@ -90,8 +149,6 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
     ? groups.flat().filter((r) => r.name.trim() && !isMatch(r.name, players)).length
     : 0;
 
-  // Compute min card width from the longest name so inputs never truncate.
-  // text-sm uppercase chars ≈ 9px each; add HDCP (80px) + gap (4px) + input padding (16px) + card padding (32px).
   const maxNameLen = useMemo(
     () => Math.max(...groups.flat().map((r) => r.name.length), 8),
     [groups]
@@ -106,6 +163,13 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
         </div>
       )}
 
+      {existingPicksCount > 0 && (
+        <div className="mb-4 px-4 py-3 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-800">
+          <strong>{existingPicksCount} pick{existingPicksCount !== 1 ? "s" : ""}</strong> have been submitted for this tournament.
+          {" "}To update a golfer name, hover over the row and click ✏️ — this updates the name without affecting any picks.
+        </div>
+      )}
+
       <div className="flex items-center gap-4 mb-4">
         <button
           onClick={handleValidate}
@@ -116,8 +180,9 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
         </button>
         <button
           onClick={handleSave}
-          disabled={saving || locked}
-          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-50"
+          disabled={saving || locked || existingPicksCount > 0}
+          title={existingPicksCount > 0 ? "Disabled — picks have been submitted. Use ✏️ to edit individual golfers." : undefined}
+          className="bg-green-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-green-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {saving ? "Saving..." : "Save Field"}
         </button>
@@ -145,8 +210,51 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
             <div className="space-y-2">
               {golfers.map((row, idx) => {
                 const invalid = players !== null && row.name.trim() !== "" && !isMatch(row.name, players);
+                const editing = row.id ? inlineEdits[row.id] : undefined;
+
+                // Inline edit mode for this row
+                if (editing) {
+                  return (
+                    <div key={row.id ?? idx} className="border border-blue-300 rounded-lg px-2 py-2 bg-blue-50 space-y-1.5">
+                      <input
+                        type="text"
+                        value={editing.name}
+                        onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], name: e.target.value } }))}
+                        className="w-full border border-blue-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        placeholder="Player name"
+                        autoFocus
+                      />
+                      <div className="flex gap-1 items-center">
+                        <input
+                          type="number"
+                          placeholder="HDCP"
+                          step="0.01"
+                          value={editing.hdcp}
+                          onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], hdcp: e.target.value } }))}
+                          className="w-20 border border-blue-300 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
+                        <button
+                          onClick={() => saveInlineEdit(row.id!)}
+                          disabled={editing.saving}
+                          className="flex-1 bg-blue-600 text-white px-2 py-1 rounded text-xs font-medium hover:bg-blue-700 transition disabled:opacity-50"
+                        >
+                          {editing.saving ? "Saving…" : "Save"}
+                        </button>
+                        <button
+                          onClick={() => cancelInlineEdit(row.id!)}
+                          className="px-2 py-1 rounded text-xs text-gray-500 hover:bg-gray-200 transition"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      {editing.error && <p className="text-xs text-red-600">{editing.error}</p>}
+                    </div>
+                  );
+                }
+
+                // Normal row
                 return (
-                  <div key={idx} className="flex gap-1 items-center">
+                  <div key={row.id ?? idx} className="flex gap-1 items-center group">
                     <div className="relative flex-1 min-w-0">
                       <input
                         type="text"
@@ -175,6 +283,16 @@ export default function FieldEditor({ tournament, locked = false }: { tournament
                       disabled={locked}
                       className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     />
+                    {/* Per-golfer edit button — only for saved golfers (have an id) */}
+                    {row.id && row.name && !locked && (
+                      <button
+                        onClick={() => startInlineEdit(row)}
+                        title="Edit this golfer without deleting picks"
+                        className="opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition text-sm"
+                      >
+                        ✏️
+                      </button>
+                    )}
                   </div>
                 );
               })}

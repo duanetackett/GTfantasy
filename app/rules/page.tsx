@@ -3,14 +3,14 @@ export default function RulesPage() {
     <div className="space-y-8">
       <h1 className="text-4xl font-bold text-white">Rules &amp; How to Play</h1>
 
-      {/* Entry Fee & Payment */}
+      {/* Donation & Payment */}
       <section className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="bg-gray-700 px-6 py-3">
-          <h2 className="font-bold text-white tracking-wide uppercase text-sm">Entry Fee &amp; Payment</h2>
+          <h2 className="font-bold text-white tracking-wide uppercase text-sm">Donation &amp; Payment</h2>
         </div>
         <div className="px-6 py-5 text-sm text-gray-800 leading-relaxed space-y-4">
           <p>
-            Entry fee is <strong>$40</strong>, of which <strong>$5 is allocated to Power Events</strong> and $35 goes into the prize pool.
+            Donation is <strong>$40</strong>.
           </p>
           <p className="font-semibold text-gray-700">If you are not attending in person, payment options are:</p>
           <div className="grid sm:grid-cols-2 gap-4">
@@ -162,11 +162,11 @@ export default function RulesPage() {
               </tr>
               <tr className="bg-white">
                 <td className="px-4 py-3 font-medium">Last Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">Entry Fee Returned</td>
+                <td className="px-4 py-3 text-center font-bold text-green-700">Donation Returned</td>
               </tr>
               <tr className="bg-gray-50">
                 <td className="px-4 py-3 font-medium">Disqualified Entry</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">Entry Fee Returned</td>
+                <td className="px-4 py-3 text-center font-bold text-green-700">Donation Returned</td>
               </tr>
             </tbody>
           </table>

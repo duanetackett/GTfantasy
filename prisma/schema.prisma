@@ -59,6 +59,7 @@ model Golfer {
   groupId               String
   name                  String
   hdcp                  Float?
+  pegtPlayerId          Int?
   qualifyingRank        Int?
   qualifyingBracket     String?
   finalPosition         Int?

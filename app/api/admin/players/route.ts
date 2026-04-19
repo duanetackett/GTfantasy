@@ -3,6 +3,7 @@ import { auth } from "@/lib/auth";
 
 // Cache the full player list for 24 hours
 let cachedPlayers: string[] | null = null;
+let cachedPlayerIds: Record<string, number> | null = null;
 let cacheTime = 0;
 const CACHE_TTL = 24 * 60 * 60 * 1000;
 const TOTAL_PAGES = 35;
@@ -13,8 +14,8 @@ export async function GET() {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  if (cachedPlayers && Date.now() - cacheTime < CACHE_TTL) {
-    return NextResponse.json({ players: cachedPlayers });
+  if (cachedPlayers && cachedPlayerIds && Date.now() - cacheTime < CACHE_TTL) {
+    return NextResponse.json({ players: cachedPlayers, playerIds: cachedPlayerIds });
   }
 
   try {
@@ -29,23 +30,26 @@ export async function GET() {
     );
 
     const allPlayers = new Set<string>();
+    const idMap: Record<string, number> = {};
     for (const html of pages) {
-      for (const name of parsePlayers(html)) {
+      for (const { name, id } of parsePlayersWithIds(html)) {
         allPlayers.add(name);
+        idMap[name.toLowerCase()] = id;
       }
     }
 
     cachedPlayers = Array.from(allPlayers).sort();
+    cachedPlayerIds = idMap;
     cacheTime = Date.now();
 
-    return NextResponse.json({ players: cachedPlayers });
+    return NextResponse.json({ players: cachedPlayers, playerIds: cachedPlayerIds });
   } catch {
     return NextResponse.json({ error: "Error fetching player list." }, { status: 500 });
   }
 }
 
-function parsePlayers(html: string): string[] {
-  const names: string[] = [];
+function parsePlayersWithIds(html: string): { name: string; id: number }[] {
+  const results: { name: string; id: number }[] = [];
   const playerMap = new Map<string, string[]>();
 
   // Each player's first and last name are separate <a> tags linking to the same numeric ID:
@@ -60,13 +64,12 @@ function parsePlayers(html: string): string[] {
     playerMap.get(id)!.push(text);
   }
 
-  for (const parts of playerMap.values()) {
-    if (parts.length >= 2) {
-      names.push(`${parts[0]} ${parts[1]}`);
-    } else if (parts.length === 1) {
-      names.push(parts[0]);
-    }
+  for (const [id, parts] of playerMap.entries()) {
+    let name: string | null = null;
+    if (parts.length >= 2) name = `${parts[0]} ${parts[1]}`;
+    else if (parts.length === 1) name = parts[0];
+    if (name) results.push({ name, id: parseInt(id) });
   }
 
-  return names;
+  return results;
 }

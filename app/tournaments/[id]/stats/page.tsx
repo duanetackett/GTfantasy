@@ -76,7 +76,6 @@ export default async function StatsPage({ params }: { params: Promise<{ id: stri
   const incompleteEntries = entries.filter((e) =>
     e.picks.length < 8 || e.picks.some((p) => p.golfer.finalScore === null)
   ).length;
-  const prizePool = (totalEntries - incompleteEntries) * 35;
 
   // Pick counts per golfer id
   const pickCounts: Record<string, number> = {};
@@ -127,28 +126,20 @@ export default async function StatsPage({ params }: { params: Promise<{ id: stri
   return (
     <div>
 
-      {/* Financial Table */}
+      {/* Summary Table */}
       <div className="rounded-xl border border-gray-200 shadow-md overflow-hidden mb-6 max-w-sm bg-white">
         <div className="bg-gray-700 px-5 py-3">
-          <h3 className="font-bold text-white text-sm tracking-wide uppercase">Tournament Financials</h3>
+          <h3 className="font-bold text-white text-sm tracking-wide uppercase">Tournament Summary</h3>
         </div>
         <table className="w-full text-sm">
           <tbody>
-            <tr className="border-b border-gray-200">
-              <td className="px-5 py-3 font-medium text-gray-800">Entry Fee</td>
-              <td className="px-5 py-3 font-semibold text-gray-900 text-right">$40</td>
-            </tr>
             <tr className="border-b border-gray-200 bg-gray-50">
               <td className="px-5 py-3 font-medium text-gray-800">Total Entries</td>
               <td className="px-5 py-3 font-semibold text-gray-900 text-right">{totalEntries}</td>
             </tr>
-            <tr className="border-b border-gray-200">
+            <tr>
               <td className="px-5 py-3 font-medium text-gray-800">Incomplete Entries</td>
               <td className="px-5 py-3 font-semibold text-gray-900 text-right">{incompleteEntries}</td>
-            </tr>
-            <tr className="bg-gray-50">
-              <td className="px-5 py-3 font-bold text-gray-900">Total Prize Pool</td>
-              <td className="px-5 py-3 font-bold text-gray-900 text-right text-base">${prizePool.toLocaleString()}</td>
             </tr>
           </tbody>
         </table>

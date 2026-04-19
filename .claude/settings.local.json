@@ -1,0 +1,40 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(PGPASSWORD=zgBMcQdpYPwmJAjM psql \"postgresql://postgres.cvpkxxvvetranttqnpoo:zgBMcQdpYPwmJAjM@aws-1-us-east-1.pooler.supabase.com:5432/postgres\" -c 'SELECT id, name, email, role FROM \"User\";')",
+      "WebFetch(domain:pegttour.com)",
+      "Bash(ls:*)",
+      "Bash(find:*)",
+      "Bash(npx prisma:*)",
+      "Bash(npm run:*)",
+      "Bash(taskkill /PID 1172 /F)",
+      "Bash(cmd /c \"taskkill /PID 1172 /F\")",
+      "Bash(node -e \":*)",
+      "Bash(npx kill-port:*)",
+      "Bash(npm install:*)",
+      "Bash(npx tsx:*)",
+      "Bash(npx tsc:*)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(npx ts-node:*)",
+      "Bash(npx dotenv:*)",
+      "Bash(fly deploy:*)",
+      "Bash(fly secrets:*)",
+      "Bash(flyctl status:*)",
+      "Bash(flyctl logs:*)",
+      "Bash(flyctl secrets:*)",
+      "Bash(flyctl machine:*)",
+      "Bash(flyctl open:*)",
+      "Bash(flyctl releases:*)",
+      "Bash(curl:*)",
+      "Bash(flyctl deploy:*)",
+      "Bash(psql:*)",
+      "Bash(gh auth:*)",
+      "Bash(git checkout:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
