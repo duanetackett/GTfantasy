@@ -243,7 +243,7 @@ export default function PicksForm({
                     <span className="text-sm font-bold flex-1">{golfer.name}</span>
                     <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0">
                       {golfer.hdcp != null && (
-                        <span className="text-xs text-gray-400 w-8 text-right">{golfer.hdcp.toFixed(2)}</span>
+                        <span className="text-xs font-bold text-gray-400 w-12 text-center tabular-nums">{golfer.hdcp.toFixed(2)}</span>
                       )}
                       {golfer.pegtPlayerId != null && (
                         <a
@@ -251,7 +251,7 @@ export default function PicksForm({
                           target="_blank"
                           rel="noopener noreferrer"
                           onClick={(e) => e.stopPropagation()}
-                          className="text-xs text-blue-500 hover:text-blue-700 hover:underline"
+                          className="text-xs font-bold text-blue-500 hover:text-blue-700 hover:underline"
                         >
                           Card
                         </a>
