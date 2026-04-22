@@ -64,7 +64,7 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
             href={`/tournaments/${openTournament.id}/picks`}
             className="inline-block bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-6 py-2 rounded-lg transition"
           >
-            Make Your Picks →
+            Make or Edit your Picks →
           </a>
         </div>
       )}

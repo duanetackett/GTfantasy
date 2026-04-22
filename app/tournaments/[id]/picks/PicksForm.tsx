@@ -240,7 +240,7 @@ export default function PicksForm({
                       onChange={() => setPick(group.id, golfer.id)}
                       className="accent-green-600 w-4 h-4 shrink-0"
                     />
-                    <span className="text-sm flex-1">{golfer.name}</span>
+                    <span className="text-sm font-bold flex-1">{golfer.name}</span>
                     <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0">
                       {golfer.hdcp != null && (
                         <span className="text-xs text-gray-400 w-8 text-right">{golfer.hdcp.toFixed(2)}</span>
