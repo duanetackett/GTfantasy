@@ -32,7 +32,8 @@ export async function DELETE(
   const { entryId } = await params;
 
   const entry = await prisma.entry.findUnique({ where: { id: entryId } });
-  if (!entry || entry.userId !== session.user.id) {
+  const isAdmin = session.user.role === "ADMIN";
+  if (!entry || (!isAdmin && entry.userId !== session.user.id)) {
     return NextResponse.json({ error: "Not found." }, { status: 404 });
   }
 

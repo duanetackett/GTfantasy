@@ -37,8 +37,29 @@ export default function EntriesTable({
   const [linkingId, setLinkingId] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
+  async function handleDelete(entry: Entry) {
+    if (!confirm(`Delete "${entry.entryName}"? This cannot be undone.`)) return;
+    setDeletingId(entry.id);
+    setMessage("");
+    setError("");
+
+    const res = await fetch(`/api/tournaments/${tournamentId}/entries/${entry.id}`, {
+      method: "DELETE",
+    });
+
+    if (res.ok) {
+      setEntries((prev) => prev.filter((e) => e.id !== entry.id));
+      setMessage(`Deleted "${entry.entryName}".`);
+    } else {
+      const data = await res.json();
+      setError(data.error ?? "Failed to delete entry.");
+    }
+    setDeletingId(null);
+  }
 
   async function saveLink(entry: Entry) {
     setLoadingId(entry.id);
@@ -85,6 +106,7 @@ export default function EntriesTable({
               ))}
               <th className="px-3 py-3 text-center whitespace-nowrap">Status</th>
               <th className="px-3 py-3 text-center whitespace-nowrap">Paid</th>
+              <th className="px-3 py-3 text-center whitespace-nowrap"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
@@ -164,6 +186,15 @@ export default function EntriesTable({
                     ) : (
                       <span className="px-2 py-0.5 rounded-full bg-red-100 text-red-600 font-medium">Unpaid</span>
                     )}
+                  </td>
+                  <td className="px-3 py-2 text-center whitespace-nowrap">
+                    <button
+                      onClick={() => handleDelete(entry)}
+                      disabled={deletingId === entry.id}
+                      className="text-xs text-red-500 hover:text-red-700 hover:underline disabled:opacity-50"
+                    >
+                      {deletingId === entry.id ? "Deleting..." : "Delete"}
+                    </button>
                   </td>
                 </tr>
               );
