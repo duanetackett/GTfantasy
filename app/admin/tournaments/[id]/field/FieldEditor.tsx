@@ -19,6 +19,11 @@ function isMatch(entered: string, players: string[]): boolean {
   return players.some((p) => normalizeName(p) === n);
 }
 
+function fmtHdcp(val: string): string {
+  const n = parseFloat(val);
+  return isNaN(n) ? val : n.toFixed(2);
+}
+
 export default function FieldEditor({ tournament, locked = false, existingPicksCount = 0 }: { tournament: Tournament; locked?: boolean; existingPicksCount?: number }) {
   const router = useRouter();
 
@@ -27,7 +32,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     for (let g = 1; g <= 8; g++) {
       const existing = tournament.groups.find((gr) => gr.groupNumber === g);
       const rows: GolferRow[] = existing
-        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name, hdcp: gf.hdcp != null ? String(gf.hdcp) : "" }))
+        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name.toUpperCase(), hdcp: gf.hdcp != null ? gf.hdcp.toFixed(2) : "" }))
         : [];
       while (rows.length < 8) rows.push({ name: "", hdcp: "" });
       result.push(rows);
@@ -76,22 +81,22 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
 
     setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: true, error: "" } }));
 
+    const upperName = edit.name.trim().toUpperCase();
     const pegtId = playerIds?.[edit.name.toLowerCase().trim()] ?? null;
 
     const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ golferId, name: edit.name, hdcp: edit.hdcp, pegtPlayerId: pegtId }),
+      body: JSON.stringify({ golferId, name: upperName, hdcp: edit.hdcp, pegtPlayerId: pegtId }),
     });
 
     const data = await res.json();
     if (!res.ok) {
       setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: false, error: data.error ?? "Failed to save." } }));
     } else {
-      // Update local groups state with new name/hdcp
       setGroups((prev) =>
         prev.map((g) =>
-          g.map((row) => (row.id === golferId ? { ...row, name: edit.name, hdcp: edit.hdcp } : row))
+          g.map((row) => (row.id === golferId ? { ...row, name: upperName, hdcp: fmtHdcp(edit.hdcp) } : row))
         )
       );
       cancelInlineEdit(golferId);
@@ -155,6 +160,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     if (!res.ok) {
       setMessage(data.error ?? "Failed to save field.");
     } else {
+      setGroups((prev) => prev.map((g) => g.map((row) => ({ ...row, name: row.name.toUpperCase(), hdcp: fmtHdcp(row.hdcp) }))));
       setMessage("Field saved successfully.");
       router.refresh();
     }

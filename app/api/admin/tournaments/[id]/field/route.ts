@@ -46,7 +46,7 @@ export async function PUT(req: NextRequest, { params }: { params: Promise<{ id: 
         groupNumber: g + 1,
         golfers: {
           create: golfers.map((r) => ({
-            name: r.name.trim(),
+            name: r.name.trim().toUpperCase(),
             hdcp: r.hdcp !== "" ? parseFloat(r.hdcp) : null,
             pegtPlayerId: r.pegtPlayerId ?? null,
           })),
@@ -86,7 +86,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   const updated = await prisma.golfer.update({
     where: { id: golferId },
     data: {
-      name: name.trim(),
+      name: name.trim().toUpperCase(),
       hdcp: hdcp !== "" ? parseFloat(hdcp) : null,
       pegtPlayerId: pegtPlayerId ?? null,
     },
