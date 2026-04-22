@@ -119,12 +119,28 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
   async function handleSave() {
     setSaving(true);
     setMessage("");
+    setValidateError("");
 
-    const groupsWithIds = playerIds
+    // Always resolve player IDs before saving so Card links are populated
+    let resolvedPlayerIds = playerIds;
+    if (!resolvedPlayerIds) {
+      const vRes = await fetch("/api/admin/players");
+      const vData = await vRes.json();
+      if (!vRes.ok) {
+        setMessage(vData.error ?? "Could not load player list.");
+        setSaving(false);
+        return;
+      }
+      setPlayers(vData.players);
+      setPlayerIds(vData.playerIds ?? null);
+      resolvedPlayerIds = vData.playerIds ?? null;
+    }
+
+    const groupsWithIds = resolvedPlayerIds
       ? groups.map((g) =>
           g.map((row) => ({
             ...row,
-            pegtPlayerId: playerIds[row.name.toLowerCase().trim()] ?? null,
+            pegtPlayerId: resolvedPlayerIds![row.name.toLowerCase().trim()] ?? null,
           }))
         )
       : groups;
