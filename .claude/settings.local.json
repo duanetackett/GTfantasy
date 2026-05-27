@@ -34,7 +34,29 @@
       "Bash(git add:*)",
       "Bash(git commit:*)",
       "Bash(git remote:*)",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "PowerShell(git add *)",
+      "PowerShell(fly deploy *)",
+      "Bash(fly apps *)",
+      "Bash(fly postgres *)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" vercel env add AUTH_SECRET production)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" vercel env add AUTH_SECRET preview)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" vercel env add AUTH_SECRET development)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" vercel env *)",
+      "Bash(DATABASE_URL=\"postgresql://neondb_owner:npg_BG9L5XIPpcMj@ep-late-heart-aqohw15v.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require\" NODE_OPTIONS=\"--use-system-ca\" npx prisma *)",
+      "Bash(DATABASE_URL_UNPOOLED=\"postgresql://neondb_owner:npg_BG9L5XIPpcMj@ep-late-heart-aqohw15v.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require\" NODE_OPTIONS=\"--use-system-ca\" npx prisma *)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" npx tsx *)",
+      "Bash(PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION=\"yes\" DATABASE_URL_UNPOOLED=\"postgresql://neondb_owner:npg_BG9L5XIPpcMj@ep-late-heart-aqohw15v.c-8.us-east-1.aws.neon.tech/neondb?sslmode=require\" NODE_OPTIONS=\"--use-system-ca\" npx prisma *)",
+      "Bash(NODE_OPTIONS=\"--use-system-ca\" vercel deploy *)",
+      "PowerShell(cd \"C:\\\\users\\\\crtck\\\\goldentee\"; $env:NODE_OPTIONS=\"--experimental-vm-modules\"; npx tsx scripts/delete-tournament.ts \"Missouri Open\" 2026 2>&1)",
+      "PowerShell(\\(Get-Content C:\\\\users\\\\crtck\\\\goldentee\\\\.env.local\\) | ForEach-Object { \\($_ -split '='\\)[0] })",
+      "PowerShell(\\(Get-Content C:\\\\users\\\\crtck\\\\goldentee\\\\.env\\) | ForEach-Object { \\($_ -split '='\\)[0] })",
+      "PowerShell(\\(Get-Content C:\\\\users\\\\crtck\\\\goldentee\\\\.env.neon\\) | ForEach-Object { \\($_ -split '='\\)[0] })",
+      "Bash(git ls-remote *)",
+      "Bash(npm uninstall *)",
+      "Bash(mkdir -p \"C:\\\\users\\\\crtck\\\\goldentee\\\\app\\\\login\\\\[[...rest]]\")",
+      "Bash(mkdir -p \"C:\\\\users\\\\crtck\\\\goldentee\\\\app\\\\register\\\\[[...rest]]\")",
+      "Bash(vercel *)"
     ]
   }
 }

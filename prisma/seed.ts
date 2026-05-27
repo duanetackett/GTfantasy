@@ -47,77 +47,99 @@ async function seedTournament(dir: string): Promise<void> {
     fs.readFileSync(metaPath, "utf-8")
   );
 
-  // Skip if tournament already exists
   const existing = await prisma.tournament.findFirst({
     where: { name: meta.name, year: meta.year },
   });
+
+  const golferLookup = new Map<string, { golferId: string; groupId: string }>();
+
+  let tournament: { id: string };
+
   if (existing) {
-    console.log(`Skipping ${meta.name} (${meta.year}) — already in database`);
-    return;
-  }
-
-  console.log(`\nSeeding: ${meta.name} (${meta.year})`);
-
-  const tournament = await prisma.tournament.create({
-    data: {
-      name: meta.name,
-      year: meta.year,
-      startDate: new Date(meta.startDate),
-      pegttourSlug: meta.pegttourSlug,
-      status: "COMPLETED",
-    },
-  });
-
-  // ── Parse groups CSV ──────────────────────────────────────────────────────
-  // Format: col0 = "Group N" (or blank), col1 = golfer name, col2 = hdcp
-  const groupsData = parseCSV(groupsPath);
-  const groupGolfers = new Map<
-    number,
-    { name: string; hdcp: number | null }[]
-  >();
-  let currentGroup = 0;
-
-  for (const row of groupsData) {
-    const [col0, col1, col2] = row;
-
-    if (/^Group\s+\d+/i.test(col0)) {
-      currentGroup = parseInt(col0.replace(/^Group\s+/i, ""));
+    const existingEntries = await prisma.entry.findMany({
+      where: { tournamentId: existing.id },
+      select: { id: true, entryName: true, createdAt: true },
+    });
+    if (existingEntries.length > 0) {
+      console.log(`Skipping ${meta.name} (${meta.year}) — already has ${existingEntries.length} entries:`);
+      for (const e of existingEntries) {
+        console.log(`  - "${e.entryName}" (id: ${e.id}, created: ${e.createdAt.toISOString()})`);
+      }
+      console.log(`\nTo force re-import, delete these entries first or run with --force to skip this check.`);
+      return;
     }
 
-    const name = col1?.trim();
-    if (
-      !name ||
-      name.toLowerCase() === "name" ||
-      name.toUpperCase() === "BLANK SPOT" ||
-      currentGroup === 0
-    )
-      continue;
+    console.log(`\n${meta.name} (${meta.year}) already exists — importing picks into existing tournament`);
+    tournament = existing;
 
-    if (!groupGolfers.has(currentGroup)) groupGolfers.set(currentGroup, []);
-    groupGolfers
-      .get(currentGroup)!
-      .push({ name, hdcp: col2 ? parseFloat(col2) : null });
-  }
+    // Build golfer lookup from existing DB records
+    const existingGolfers = await prisma.golfer.findMany({
+      where: { group: { tournamentId: existing.id } },
+      include: { group: { select: { id: true } } },
+    });
+    for (const g of existingGolfers) {
+      golferLookup.set(g.name.toLowerCase().trim(), {
+        golferId: g.id,
+        groupId: g.group.id,
+      });
+    }
+    console.log(`  Loaded ${golferLookup.size} golfers from database`);
+  } else {
+    console.log(`\nSeeding: ${meta.name} (${meta.year})`);
 
-  // ── Create groups + golfers, build name lookup ────────────────────────────
-  const golferLookup = new Map<
-    string,
-    { golferId: string; groupId: string }
-  >();
-
-  for (const [groupNumber, golfers] of groupGolfers.entries()) {
-    const group = await prisma.group.create({
-      data: { tournamentId: tournament.id, groupNumber },
+    tournament = await prisma.tournament.create({
+      data: {
+        name: meta.name,
+        year: meta.year,
+        startDate: new Date(meta.startDate),
+        pegttourSlug: meta.pegttourSlug,
+        status: "COMPLETED",
+      },
     });
 
-    for (const g of golfers) {
-      const golfer = await prisma.golfer.create({
-        data: { groupId: group.id, name: g.name, hdcp: g.hdcp },
+    // ── Parse groups CSV ────────────────────────────────────────────────────
+    // Format: col0 = "Group N" (or blank), col1 = golfer name, col2 = hdcp
+    const groupsData = parseCSV(groupsPath);
+    const groupGolfers = new Map<number, { name: string; hdcp: number | null }[]>();
+    let currentGroup = 0;
+
+    for (const row of groupsData) {
+      const [col0, col1, col2] = row;
+
+      if (/^Group\s+\d+/i.test(col0)) {
+        currentGroup = parseInt(col0.replace(/^Group\s+/i, ""));
+      }
+
+      const name = col1?.trim();
+      if (
+        !name ||
+        name.toLowerCase() === "name" ||
+        name.toUpperCase() === "BLANK SPOT" ||
+        currentGroup === 0
+      )
+        continue;
+
+      if (!groupGolfers.has(currentGroup)) groupGolfers.set(currentGroup, []);
+      groupGolfers
+        .get(currentGroup)!
+        .push({ name, hdcp: col2 ? parseFloat(col2) : null });
+    }
+
+    // ── Create groups + golfers, build name lookup ──────────────────────────
+    for (const [groupNumber, golfers] of groupGolfers.entries()) {
+      const group = await prisma.group.create({
+        data: { tournamentId: tournament.id, groupNumber },
       });
-      golferLookup.set(g.name.toLowerCase().trim(), {
-        golferId: golfer.id,
-        groupId: group.id,
-      });
+
+      for (const g of golfers) {
+        const golfer = await prisma.golfer.create({
+          data: { groupId: group.id, name: g.name, hdcp: g.hdcp },
+        });
+        golferLookup.set(g.name.toLowerCase().trim(), {
+          golferId: golfer.id,
+          groupId: group.id,
+        });
+      }
     }
   }
 

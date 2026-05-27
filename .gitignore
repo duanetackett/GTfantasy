@@ -44,3 +44,6 @@ next-env.d.ts
 scripts/backups/
 
 /app/generated/prisma
+
+.vercel
+.env*.local

@@ -1,22 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { signOut } from "next-auth/react";
-import { useSession } from "next-auth/react";
+import { useUser, useClerk } from "@clerk/nextjs";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 
 export default function Navbar() {
-  const { data: session } = useSession();
+  const { user } = useUser();
+  const { signOut } = useClerk();
   const pathname = usePathname();
   const onDashboard = pathname === "/dashboard";
   const onAdmin = pathname.startsWith("/admin");
   const [menuOpen, setMenuOpen] = useState(false);
 
+  const isAdmin = user?.publicMetadata?.role === "ADMIN";
+  const displayName = user?.fullName || user?.firstName || "";
+
   const links = [
     ...(onDashboard ? [] : [{ label: "Dashboard", href: "/dashboard" }]),
     { label: "Rules", href: "/rules" },
-    ...(session?.user?.role === "ADMIN" ? [{ label: "Admin", href: "/admin" }] : []),
+    ...(isAdmin ? [{ label: "Admin", href: "/admin" }] : []),
     { label: "Account", href: "/account" },
   ];
 
@@ -24,15 +27,15 @@ export default function Navbar() {
     <div className="w-full relative px-4 py-3 text-xs text-gray-300">
       {/* Desktop nav */}
       <div className="hidden sm:flex justify-end items-center gap-4">
-        {session?.user?.name && (
-          <span className="text-gray-400">Logged in as <span className="text-white">{session.user.name}</span></span>
+        {displayName && (
+          <span className="text-gray-400">Logged in as <span className="text-white">{displayName}</span></span>
         )}
         <span className="text-gray-600">|</span>
         {links.map((l) => (
           <Link key={l.href} href={l.href} className="hover:text-white transition">{l.label}</Link>
         ))}
         <button
-          onClick={() => signOut({ callbackUrl: "/" })}
+          onClick={() => signOut({ redirectUrl: "/" })}
           className="hover:text-white transition cursor-pointer"
         >
           Log Out
@@ -42,8 +45,8 @@ export default function Navbar() {
       {/* Mobile nav */}
       <div className="flex sm:hidden items-center justify-between">
         <span className="text-gray-400 text-xs truncate max-w-[60%]">
-          {session?.user?.name && (
-            <><span className="text-gray-500">Hi, </span><span className="text-white">{session.user.name}</span></>
+          {displayName && (
+            <><span className="text-gray-500">Hi, </span><span className="text-white">{displayName}</span></>
           )}
         </span>
         <button
@@ -77,7 +80,7 @@ export default function Navbar() {
             </Link>
           ))}
           <button
-            onClick={() => signOut({ callbackUrl: "/" })}
+            onClick={() => signOut({ redirectUrl: "/" })}
             className="w-full text-left px-5 py-3 text-sm text-red-400 hover:bg-white/10 hover:text-red-300 transition"
           >
             Log Out

@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { redirect } from "next/navigation";
-import SessionProvider from "@/components/SessionProvider";
 import Navbar from "@/components/Navbar";
 import TournamentTabs from "./TournamentTabs";
 import TournamentSwitcher from "@/components/TournamentSwitcher";
@@ -41,22 +40,20 @@ export default async function TournamentLayout({
     : [];
 
   return (
-    <SessionProvider>
-      <div className="min-h-screen bg-gradient-to-br from-green-950 via-slate-900 to-gray-950">
-        <Navbar />
-        <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
-          {tournament && showTabs && (
-            <div className="mb-2">
-              <TournamentSwitcher tournaments={allTournaments} currentId={id} />
-              <h2 className="text-xl font-semibold text-white mt-3 mb-4">
-                {tournament.name} {tournament.year}
-              </h2>
-              <TournamentTabs tabs={tabs} />
-            </div>
-          )}
-          {children}
-        </main>
-      </div>
-    </SessionProvider>
+    <div className="min-h-screen bg-gradient-to-br from-green-950 via-slate-900 to-gray-950">
+      <Navbar />
+      <main className="max-w-7xl mx-auto px-3 sm:px-4 py-4 sm:py-8">
+        {tournament && showTabs && (
+          <div className="mb-2">
+            <TournamentSwitcher tournaments={allTournaments} currentId={id} />
+            <h2 className="text-xl font-semibold text-white mt-3 mb-4">
+              {tournament.name} {tournament.year}
+            </h2>
+            <TournamentTabs tabs={tabs} />
+          </div>
+        )}
+        {children}
+      </main>
+    </div>
   );
 }

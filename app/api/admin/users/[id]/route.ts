@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
-import bcrypt from "bcryptjs";
+import { clerkClient } from "@clerk/nextjs/server";
 
 export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const session = await auth();
@@ -16,16 +16,16 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
     if (!["USER", "ADMIN"].includes(body.role)) {
       return NextResponse.json({ error: "Invalid role." }, { status: 400 });
     }
-    await prisma.user.update({ where: { id }, data: { role: body.role } });
-    return NextResponse.json({ ok: true });
-  }
 
-  if (body.password !== undefined) {
-    if (!body.password || body.password.length < 6) {
-      return NextResponse.json({ error: "Password must be at least 6 characters." }, { status: 400 });
+    const user = await prisma.user.update({ where: { id }, data: { role: body.role } });
+
+    if (user.clerkId) {
+      const client = await clerkClient();
+      await client.users.updateUserMetadata(user.clerkId, {
+        publicMetadata: { role: body.role },
+      });
     }
-    const hashed = await bcrypt.hash(body.password, 10);
-    await prisma.user.update({ where: { id }, data: { password: hashed } });
+
     return NextResponse.json({ ok: true });
   }
 
@@ -44,6 +44,12 @@ export async function DELETE(_req: NextRequest, { params }: { params: Promise<{ 
     return NextResponse.json({ error: "You cannot delete your own account." }, { status: 400 });
   }
 
-  await prisma.user.delete({ where: { id } });
+  const user = await prisma.user.delete({ where: { id } });
+
+  if (user.clerkId) {
+    const client = await clerkClient();
+    await client.users.deleteUser(user.clerkId);
+  }
+
   return NextResponse.json({ ok: true });
 }

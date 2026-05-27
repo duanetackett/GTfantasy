@@ -1,32 +1,33 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
+import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
+import { NextResponse } from "next/server";
 
-export async function proxy(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/login(.*)",
+  "/register(.*)",
+  "/rules(.*)",
+  "/login/sso-callback(.*)",
+  "/api/webhooks(.*)",
+]);
 
-  // Always allow public and auth pages through
-  if (
-    pathname === "/" ||
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/register") ||
-    pathname.startsWith("/rules")
-  ) {
-    return NextResponse.next();
+export default clerkMiddleware(async (auth, request) => {
+  if (isPublicRoute(request)) return NextResponse.next();
+
+  const { userId, sessionClaims } = await auth();
+
+  if (!userId) {
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const session = await auth();
-
-  if (!session) {
-    return NextResponse.redirect(new URL("/login", req.url));
+  const role = (sessionClaims?.publicMetadata as { role?: string } | undefined)?.role;
+  if (request.nextUrl.pathname.startsWith("/admin") && role !== "ADMIN") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
-
-  if (pathname.startsWith("/admin") && session.user?.role !== "ADMIN") {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
-  }
-
-  return NextResponse.next();
-}
+});
 
 export const config = {
-  matcher: ["/((?!api|_next/static|_next/image|favicon.ico|.*\\.png|.*\\.jpg|.*\\.svg|.*\\.ico).*)"],
+  matcher: [
+    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
+    "/(api|trpc)(.*)",
+  ],
 };
