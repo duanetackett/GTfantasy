@@ -101,7 +101,7 @@ export default function AdminControls({
           Finances
         </Link>
 
-        {tournament.pegttourSlug && (
+        {tournament.pegttourSlug ? (
           <button
             onClick={handleCalculate}
             disabled={calculating}
@@ -109,6 +109,13 @@ export default function AdminControls({
           >
             {calculating ? "Fetching from PEGT..." : "Calculate Results"}
           </button>
+        ) : (
+          <Link
+            href={`/admin/tournaments/${tournament.id}/results`}
+            className="inline-block bg-blue-600 text-white px-4 py-2 rounded-lg text-sm hover:bg-blue-700 transition"
+          >
+            Enter Results
+          </Link>
         )}
       </div>
 
