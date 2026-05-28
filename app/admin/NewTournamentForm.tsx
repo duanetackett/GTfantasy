@@ -33,8 +33,14 @@ export default function NewTournamentForm() {
       .finally(() => setLoadingList(false));
   }, []);
 
-  const tournamentsForYear: Tournament[] =
-    yearGroups.find((g) => g.year === parseInt(selectedYear))?.tournaments ?? [];
+  const MANUAL_TOURNAMENTS: Tournament[] = [
+    { name: "World Championship", slug: "__manual__world-championship" },
+  ];
+
+  const tournamentsForYear: Tournament[] = [
+    ...MANUAL_TOURNAMENTS,
+    ...(yearGroups.find((g) => g.year === parseInt(selectedYear))?.tournaments ?? []),
+  ];
 
   const selectedTournament = tournamentsForYear.find((t) => t.slug === selectedSlug);
 
@@ -55,7 +61,9 @@ export default function NewTournamentForm() {
       body: JSON.stringify({
         name: selectedTournament.name,
         startDate,
-        pegttourSlug: selectedTournament.slug,
+        pegttourSlug: selectedTournament.slug.startsWith("__manual__")
+          ? null
+          : selectedTournament.slug,
       }),
     });
 
