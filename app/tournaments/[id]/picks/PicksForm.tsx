@@ -224,7 +224,7 @@ export default function PicksForm({
         {tournament.groups.map((group) => {
           const selectedId = activePicks[group.id];
           return (
-            <div key={group.id} className="bg-white rounded-xl shadow p-3">
+            <div key={group.id} className="bg-white rounded-xl shadow p-3 text-gray-900">
               <h4 className="font-semibold text-gray-700 text-sm mb-2 border-b pb-1.5">Group {group.groupNumber}</h4>
               <div className="space-y-0.5">
                 {group.golfers.map((golfer) => (
