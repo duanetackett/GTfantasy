@@ -3,14 +3,19 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-type Golfer = { id: string; name: string; hdcp: number | null };
+type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null };
 type Group = { id: string; groupNumber: number; golfers: Golfer[] };
 type Tournament = { id: string; name: string; groups: Group[] };
 
 type GolferRow = { id?: string; name: string; hdcp: string; pegtPlayerId?: number | null };
 
 function normalizeName(name: string) {
-  return name.toLowerCase().trim().replace(/\s+/g, " ");
+  return name
+    .toLowerCase()
+    .replace(/&rsquo;|&lsquo;|&apos;|&#8217;|&#8216;|&#39;|&#039;|&#x2019;|&#x2018;/gi, "")
+    .replace(/[‘’ʼ`']/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function isMatch(entered: string, players: string[]): boolean {
@@ -32,7 +37,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     for (let g = 1; g <= 8; g++) {
       const existing = tournament.groups.find((gr) => gr.groupNumber === g);
       const rows: GolferRow[] = existing
-        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name.toUpperCase(), hdcp: gf.hdcp != null ? gf.hdcp.toFixed(2) : "" }))
+        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name.toUpperCase(), hdcp: gf.hdcp != null ? gf.hdcp.toFixed(2) : "", pegtPlayerId: gf.pegtPlayerId }))
         : [];
       while (rows.length < 8) rows.push({ name: "", hdcp: "" });
       result.push(rows);
@@ -48,8 +53,8 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
   const [playerIds, setPlayerIds] = useState<Record<string, number> | null>(null);
   const [validateError, setValidateError] = useState("");
 
-  // Per-golfer inline edit state: golferId → { name, hdcp, saving, error }
-  const [inlineEdits, setInlineEdits] = useState<Record<string, { name: string; hdcp: string; saving: boolean; error: string }>>({});
+  // Per-golfer inline edit state: golferId → { name, hdcp, pegtPlayerId, saving, error }
+  const [inlineEdits, setInlineEdits] = useState<Record<string, { name: string; hdcp: string; pegtPlayerId: string; saving: boolean; error: string }>>({});
 
   function updateGolfer(groupIdx: number, golferIdx: number, field: "name" | "hdcp", value: string) {
     setGroups((prev) => {
@@ -63,7 +68,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     if (!golfer.id) return;
     setInlineEdits((prev) => ({
       ...prev,
-      [golfer.id!]: { name: golfer.name, hdcp: golfer.hdcp, saving: false, error: "" },
+      [golfer.id!]: { name: golfer.name, hdcp: golfer.hdcp, pegtPlayerId: golfer.pegtPlayerId != null ? String(golfer.pegtPlayerId) : "", saving: false, error: "" },
     }));
   }
 
@@ -82,7 +87,9 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: true, error: "" } }));
 
     const upperName = edit.name.trim().toUpperCase();
-    const pegtId = playerIds?.[edit.name.toLowerCase().trim()] ?? null;
+    const manualId = edit.pegtPlayerId.trim() ? parseInt(edit.pegtPlayerId.trim()) : null;
+    const autoId = playerIds?.[normalizeName(edit.name)] ?? null;
+    const pegtId = manualId ?? autoId;
 
     const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
       method: "PATCH",
@@ -145,7 +152,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
       ? groups.map((g) =>
           g.map((row) => ({
             ...row,
-            pegtPlayerId: resolvedPlayerIds![row.name.toLowerCase().trim()] ?? null,
+            pegtPlayerId: resolvedPlayerIds![normalizeName(row.name)] ?? null,
           }))
         )
       : groups;
@@ -254,6 +261,14 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                           value={editing.hdcp}
                           onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], hdcp: e.target.value } }))}
                           className="w-20 border border-blue-300 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                        />
+                        <input
+                          type="number"
+                          placeholder="PEGT ID"
+                          value={editing.pegtPlayerId}
+                          onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], pegtPlayerId: e.target.value } }))}
+                          className="w-24 border border-blue-300 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          title="PEGT Player ID (from pegttour.com/players/ID — overrides auto-match)"
                         />
                         <button
                           onClick={() => saveInlineEdit(row.id!)}

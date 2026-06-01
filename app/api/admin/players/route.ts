@@ -34,7 +34,7 @@ export async function GET() {
     for (const html of pages) {
       for (const { name, id } of parsePlayersWithIds(html)) {
         allPlayers.add(name);
-        idMap[name.toLowerCase()] = id;
+        idMap[normalizeKey(name)] = id;
       }
     }
 
@@ -46,6 +46,15 @@ export async function GET() {
   } catch {
     return NextResponse.json({ error: "Error fetching player list." }, { status: 500 });
   }
+}
+
+function normalizeKey(name: string): string {
+  return name
+    .toLowerCase()
+    .replace(/&rsquo;|&lsquo;|&apos;|&#8217;|&#8216;|&#39;|&#039;|&#x2019;|&#x2018;/gi, "")
+    .replace(/[''ʼ`']/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
 function parsePlayersWithIds(html: string): { name: string; id: number }[] {
