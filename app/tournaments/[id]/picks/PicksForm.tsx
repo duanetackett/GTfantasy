@@ -9,6 +9,10 @@ type Tournament = { id: string; name: string; groups: Group[] };
 type Pick = { groupId: string; golferId: string };
 type Entry = { id: string; entryName: string; picks: Pick[] };
 
+function toDisplayName(name: string): string {
+  return name.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 function picksToMap(picks: Pick[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const p of picks) map[p.groupId] = p.golferId;
@@ -240,7 +244,7 @@ export default function PicksForm({
                       onChange={() => setPick(group.id, golfer.id)}
                       className="accent-green-600 w-4 h-4 shrink-0"
                     />
-                    <span className="text-sm font-bold flex-1">{golfer.name}</span>
+                    <span className="text-base sm:text-sm font-semibold flex-1">{toDisplayName(golfer.name)}</span>
                     <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0">
                       {golfer.hdcp != null && (
                         <span className="text-xs font-bold text-gray-400 w-12 text-center tabular-nums">{golfer.hdcp.toFixed(2)}</span>
