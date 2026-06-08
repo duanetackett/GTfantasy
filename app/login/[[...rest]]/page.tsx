@@ -17,13 +17,13 @@ export default function LoginPage() {
         Golden Tee Fantasy<br />
         <span className="text-base sm:text-lg font-normal text-green-300">by Power Events</span>
       </h1>
-      <SignIn fallbackRedirectUrl="/dashboard" />
-      <p className="mt-4 text-white/50 text-sm">
+      <p className="mb-4 text-white/50 text-sm">
         Forgot your password?{" "}
         <a href="/forgot-password" className="text-green-400 hover:text-green-300 transition-colors">
           Reset it here
         </a>
       </p>
+      <SignIn fallbackRedirectUrl="/dashboard" />
     </div>
   );
 }
