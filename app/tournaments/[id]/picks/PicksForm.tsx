@@ -167,10 +167,20 @@ export default function PicksForm({
     );
   }
 
+  function handlePrint() {
+    window.print();
+  }
+
   return (
     <div className="pb-24 sm:pb-0">
+      {/* Print-only header */}
+      <div className="hidden print:block mb-6">
+        <h1 className="text-2xl font-bold">{tournament.name} — My Picks</h1>
+        {activeEntry && <p className="text-lg mt-1">{activeEntry.entryName}</p>}
+      </div>
+
       {/* Entry tabs */}
-      <div className="flex items-center gap-2 mb-4 flex-wrap">
+      <div className="flex items-center gap-2 mb-4 flex-wrap print:hidden">
         {localEntries.map((entry, idx) => (
           <div key={entry.id} className="flex items-center">
             <button
@@ -208,13 +218,19 @@ export default function PicksForm({
       </div>
 
       {/* Save bar — sticky on mobile, inline on desktop */}
-      <div className="hidden sm:flex items-center gap-4 mb-6">
+      <div className="hidden sm:flex items-center gap-4 mb-6 print:hidden">
         <button
           onClick={handleSave}
           disabled={saving}
           className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 font-medium"
         >
           {saving ? "Saving..." : "Save Picks"}
+        </button>
+        <button
+          onClick={handlePrint}
+          className="bg-white/10 text-white border border-white/20 px-6 py-2 rounded-lg hover:bg-white/20 transition font-medium"
+        >
+          Print Picks
         </button>
         {error && <p className="text-sm text-red-400">{error}</p>}
       </div>
@@ -233,7 +249,7 @@ export default function PicksForm({
                     className={`flex items-center gap-2 px-2 py-2 sm:py-1 rounded-lg cursor-pointer transition ${
                       selectedId === golfer.id
                         ? "bg-green-50 border border-green-400"
-                        : "border border-transparent hover:bg-gray-50"
+                        : "border border-transparent hover:bg-gray-50 print:hidden"
                     }`}
                   >
                     <input
@@ -242,10 +258,10 @@ export default function PicksForm({
                       value={golfer.id}
                       checked={selectedId === golfer.id}
                       onChange={() => setPick(group.id, golfer.id)}
-                      className="accent-green-600 w-4 h-4 shrink-0"
+                      className="accent-green-600 w-4 h-4 shrink-0 print:hidden"
                     />
                     <span className="text-base sm:text-sm font-semibold flex-1">{toDisplayName(golfer.name)}</span>
-                    <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0">
+                    <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0 print:hidden">
                       {golfer.hdcp != null && (
                         <span className="text-xs font-bold text-gray-400 w-12 text-center tabular-nums">{golfer.hdcp.toFixed(2)}</span>
                       )}
@@ -270,7 +286,7 @@ export default function PicksForm({
       </div>
 
       {/* Sticky save bar — mobile only */}
-      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-white/10 px-4 py-3 flex items-center gap-3">
+      <div className="sm:hidden print:hidden fixed bottom-0 left-0 right-0 z-50 bg-slate-900/95 border-t border-white/10 px-4 py-3 flex items-center gap-3">
         <button
           onClick={handleSave}
           disabled={saving}

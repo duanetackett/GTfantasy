@@ -24,7 +24,7 @@ export default function Navbar() {
   ];
 
   return (
-    <div className="w-full relative px-4 py-3 text-xs text-gray-300">
+    <div className="w-full relative px-4 py-3 text-xs text-gray-300 print:hidden">
       {/* Desktop nav */}
       <div className="hidden sm:flex justify-end items-center gap-4">
         {displayName && (
