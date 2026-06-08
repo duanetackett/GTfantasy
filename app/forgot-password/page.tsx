@@ -124,30 +124,39 @@ export default function ForgotPasswordPage() {
             <p className="text-white/80 text-sm text-center">
               Check your email for the code and enter your new password below.
             </p>
-            <input
-              type="text"
-              required
-              placeholder="Reset code"
-              value={code}
-              onChange={(e) => setCode(e.target.value)}
-              className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-            <input
-              type="password"
-              required
-              placeholder="New password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
-            <input
-              type="password"
-              required
-              placeholder="Confirm new password"
-              value={confirm}
-              onChange={(e) => setConfirm(e.target.value)}
-              className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
-            />
+            <div className="flex flex-col gap-1">
+              <label className="text-white/80 text-sm font-medium">Reset code from your email</label>
+              <input
+                type="text"
+                required
+                placeholder="Enter the 6-digit code"
+                value={code}
+                onChange={(e) => setCode(e.target.value)}
+                className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-white/80 text-sm font-medium">New password</label>
+              <input
+                type="password"
+                required
+                placeholder="Enter new password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </div>
+            <div className="flex flex-col gap-1">
+              <label className="text-white/80 text-sm font-medium">Confirm new password</label>
+              <input
+                type="password"
+                required
+                placeholder="Re-enter new password"
+                value={confirm}
+                onChange={(e) => setConfirm(e.target.value)}
+                className="rounded-lg px-4 py-2 bg-white/20 text-white placeholder-white/50 border border-white/20 focus:outline-none focus:ring-2 focus:ring-green-400"
+              />
+            </div>
             {error && <p className="text-red-400 text-sm text-center">{error}</p>}
             <button
               type="submit"
