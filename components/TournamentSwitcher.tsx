@@ -11,6 +11,7 @@ const KNOWN_TOURNAMENTS = [
   "Music City Open",
   "Carolina Clash",
   "Texas Holiday Classic",
+  "World Championship",
 ];
 
 const CURRENT_YEAR = 2026;
