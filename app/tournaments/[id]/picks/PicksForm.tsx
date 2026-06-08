@@ -84,8 +84,6 @@ export default function PicksForm({
       if (isNew) {
         const newEntry: Entry = { id: data.id, entryName: data.entryName, picks };
         setLocalEntries((prev) => [...prev, newEntry]);
-        setPickMaps((prev) => [...prev, activePicks]);
-        setActiveIdx(localEntries.length);
       }
       setShowConfirm(true);
     }
