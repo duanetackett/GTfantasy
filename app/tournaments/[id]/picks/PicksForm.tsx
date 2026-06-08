@@ -131,8 +131,8 @@ export default function PicksForm({
     const newEntries = localEntries.filter((_, i) => i !== idx);
     const newPickMaps = pickMaps.filter((_, i) => i !== idx);
     setLocalEntries(newEntries);
-    setPickMaps(newPickMaps);
-    setActiveIdx(Math.min(idx, newEntries.length - 1));
+    setPickMaps(newEntries.length === 0 ? [{}] : newPickMaps);
+    setActiveIdx(newEntries.length === 0 ? 0 : Math.min(idx, newEntries.length - 1));
     setDeleting(false);
     setShowConfirm(false);
   }
