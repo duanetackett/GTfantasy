@@ -249,7 +249,7 @@ export default function PicksForm({
                     className={`flex items-center gap-2 px-2 py-2 sm:py-1 rounded-lg cursor-pointer transition ${
                       selectedId === golfer.id
                         ? "bg-green-50 border border-green-400"
-                        : "border border-transparent hover:bg-gray-50 print:hidden"
+                        : "border border-transparent hover:bg-gray-50"
                     }`}
                   >
                     <input
