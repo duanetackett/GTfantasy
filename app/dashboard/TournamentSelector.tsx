@@ -37,10 +37,10 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
     setSelectedName("");
   }, [selectedYear]);
 
-  const lookup = new Map(tournaments.map((t) => [`${t.name}|${t.year}`, t]));
+  const lookup = new Map(tournaments.map((t) => [`${t.name.toLowerCase()}|${t.year}`, t]));
 
   const options: DropdownOption[] = KNOWN_TOURNAMENTS.map((name) => {
-    const t = lookup.get(`${name}|${selectedYear}`);
+    const t = lookup.get(`${name.toLowerCase()}|${selectedYear}`);
     return {
       name,
       href: t ? tournamentLink(t.id, t.status) : null,
