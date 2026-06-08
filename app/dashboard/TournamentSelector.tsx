@@ -54,6 +54,7 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
   }
 
   const openTournament = tournaments.find((t) => t.status === "PICKS_OPEN");
+  const lockedTournament = !openTournament ? tournaments.find((t) => t.status === "PICKS_LOCKED") : null;
 
   return (
     <div className="flex flex-col items-center w-full max-w-md">
@@ -66,6 +67,18 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
             className="inline-block bg-green-600 hover:bg-green-500 text-white text-sm font-semibold px-6 py-2 rounded-lg transition"
           >
             Make or Edit your Picks →
+          </a>
+        </div>
+      )}
+      {lockedTournament && (
+        <div className="w-full mb-8 bg-amber-900/40 border border-amber-500/50 rounded-xl px-6 py-4 text-center">
+          <p className="text-amber-400 text-sm font-semibold uppercase tracking-wide mb-1">Picks Locked</p>
+          <p className="text-white text-lg font-bold mb-3">{lockedTournament.year} {lockedTournament.name}</p>
+          <a
+            href={`/tournaments/${lockedTournament.id}/leaderboard`}
+            className="inline-block bg-amber-600 hover:bg-amber-500 text-white text-sm font-semibold px-6 py-2 rounded-lg transition"
+          >
+            View Picks →
           </a>
         </div>
       )}
