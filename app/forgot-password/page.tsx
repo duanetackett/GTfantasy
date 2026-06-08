@@ -1,11 +1,12 @@
 "use client";
 
-import { useSignIn } from "@clerk/nextjs";
+import { useSignIn, useClerk } from "@clerk/nextjs";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function ForgotPasswordPage() {
-  const { signIn, setActive, isLoaded } = useSignIn();
+  const { signIn } = useSignIn();
+  const { setActive } = useClerk();
   const router = useRouter();
 
   const [step, setStep] = useState<"email" | "code">("email");
@@ -18,47 +19,62 @@ export default function ForgotPasswordPage() {
 
   async function sendCode(e: React.FormEvent) {
     e.preventDefault();
-    if (!isLoaded) return;
+    if (!signIn) return;
     setError("");
     setLoading(true);
-    try {
-      await signIn.create({
-        strategy: "reset_password_email_code",
-        identifier: email,
-      });
-      setStep("code");
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Something went wrong.";
-      setError((err as { errors?: { message: string }[] })?.errors?.[0]?.message ?? msg);
-    } finally {
+
+    const createResult = await signIn.create({ identifier: email });
+    if (createResult.error) {
+      setError(createResult.error.message ?? "Could not find that account.");
       setLoading(false);
+      return;
     }
+
+    const sendResult = await signIn.resetPasswordEmailCode.sendCode();
+    if (sendResult.error) {
+      setError(sendResult.error.message ?? "Failed to send reset code.");
+      setLoading(false);
+      return;
+    }
+
+    setStep("code");
+    setLoading(false);
   }
 
   async function resetPassword(e: React.FormEvent) {
     e.preventDefault();
-    if (!isLoaded) return;
+    if (!signIn) return;
     if (password !== confirm) {
       setError("Passwords do not match.");
       return;
     }
     setError("");
     setLoading(true);
-    try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "reset_password_email_code",
-        code,
-        password,
-      });
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        router.push("/dashboard");
-      }
-    } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Something went wrong.";
-      setError((err as { errors?: { message: string }[] })?.errors?.[0]?.message ?? msg);
-    } finally {
+
+    const verifyResult = await signIn.resetPasswordEmailCode.verifyCode({ code });
+    if (verifyResult.error) {
+      setError(verifyResult.error.message ?? "Invalid or expired code.");
       setLoading(false);
+      return;
+    }
+
+    const submitResult = await signIn.resetPasswordEmailCode.submitPassword({ password });
+    if (submitResult.error) {
+      setError(submitResult.error.message ?? "Failed to set new password.");
+      setLoading(false);
+      return;
+    }
+
+    const finalizeResult = await signIn.finalize();
+    if (finalizeResult.error) {
+      setError(finalizeResult.error.message ?? "Failed to complete sign-in.");
+      setLoading(false);
+      return;
+    }
+
+    if (signIn.createdSessionId) {
+      await setActive({ session: signIn.createdSessionId });
+      router.push("/dashboard");
     }
   }
 
