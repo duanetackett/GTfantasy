@@ -173,10 +173,28 @@ export default function PicksForm({
 
   return (
     <div className="pb-24 sm:pb-0">
-      {/* Print-only header */}
-      <div className="hidden print:block mb-6">
-        <h1 className="text-2xl font-bold">{tournament.name} — My Picks</h1>
-        {activeEntry && <p className="text-lg mt-1">{activeEntry.entryName}</p>}
+      {/* Print-only: all entries */}
+      <div className="hidden print:block">
+        <h1 className="text-2xl font-bold mb-6">{tournament.name} — My Picks</h1>
+        {localEntries.map((entry, idx) => {
+          const picks = pickMaps[idx] ?? {};
+          return (
+            <div key={entry.id} className="mb-8 break-inside-avoid">
+              <h2 className="text-lg font-bold border-b-2 border-black pb-1 mb-3">{entry.entryName}</h2>
+              <div className="grid grid-cols-4 gap-3">
+                {tournament.groups.map((group) => {
+                  const selectedGolfer = group.golfers.find((g) => g.id === picks[group.id]);
+                  return (
+                    <div key={group.id} className="border border-gray-300 rounded p-2">
+                      <div className="text-xs font-bold text-gray-500 mb-1">Group {group.groupNumber}</div>
+                      <div className="text-sm font-semibold">{selectedGolfer ? toDisplayName(selectedGolfer.name) : "—"}</div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </div>
 
       {/* Entry tabs */}
@@ -249,7 +267,7 @@ export default function PicksForm({
                     className={`flex items-center gap-2 px-2 py-2 sm:py-1 rounded-lg cursor-pointer transition ${
                       selectedId === golfer.id
                         ? "bg-green-50 border border-green-400"
-                        : "border border-transparent hover:bg-gray-50"
+                        : "border border-transparent hover:bg-gray-50 print:hidden"
                     }`}
                   >
                     <input
