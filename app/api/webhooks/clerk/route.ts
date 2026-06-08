@@ -7,6 +7,7 @@ type ClerkUserEvent = {
   type: string;
   data: {
     id: string;
+    user_id?: string;
     email_addresses: { email_address: string; id: string }[];
     primary_email_address_id: string;
     first_name: string | null;
@@ -79,6 +80,13 @@ export async function POST(req: NextRequest) {
         data: { name, email: primaryEmail },
       });
     }
+  }
+
+  if (type === "session.created" && data.user_id) {
+    await prisma.user.updateMany({
+      where: { clerkId: data.user_id },
+      data: { lastLoginAt: new Date() },
+    });
   }
 
   return NextResponse.json({ ok: true });
