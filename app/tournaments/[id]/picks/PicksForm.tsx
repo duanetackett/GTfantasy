@@ -254,7 +254,7 @@ export default function PicksForm({
       </div>
 
       {/* Groups */}
-      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 print:hidden">
         {tournament.groups.map((group) => {
           const selectedId = activePicks[group.id];
           return (
