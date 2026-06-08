@@ -100,7 +100,7 @@ export default function TournamentDropdown({
 
       {/* Dropdown panel — opens upward if not enough space below */}
       {open && (
-        <div className={`absolute z-50 w-full rounded-lg border border-white/10 bg-slate-800 shadow-xl overflow-y-auto max-h-[60vh] ${openUpward ? "bottom-full mb-1" : "top-full mt-1"}`}>
+        <div className={`absolute z-50 w-full rounded-lg border border-white/10 bg-slate-800 shadow-xl ${openUpward ? "bottom-full mb-1" : "top-full mt-1"}`}>
           {options.map((opt) => {
             const available = !!opt.href;
             return (
