@@ -236,21 +236,23 @@ export default function PicksForm({
       </div>
 
       {/* Save bar — sticky on mobile, inline on desktop */}
-      <div className="hidden sm:flex items-center gap-4 mb-6 print:hidden">
-        <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 font-medium"
-        >
-          {saving ? "Saving..." : "Save Picks"}
-        </button>
+      <div className="hidden sm:flex items-center justify-between mb-6 print:hidden">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={handleSave}
+            disabled={saving}
+            className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition disabled:opacity-50 font-medium"
+          >
+            {saving ? "Saving..." : "Save Picks"}
+          </button>
+          {error && <p className="text-sm text-red-400">{error}</p>}
+        </div>
         <button
           onClick={handlePrint}
           className="bg-white/10 text-white border border-white/20 px-6 py-2 rounded-lg hover:bg-white/20 transition font-medium"
         >
           Print Picks
         </button>
-        {error && <p className="text-sm text-red-400">{error}</p>}
       </div>
 
       {/* Groups */}
