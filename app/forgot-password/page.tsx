@@ -129,6 +129,7 @@ export default function ForgotPasswordPage() {
               <input
                 type="text"
                 required
+                autoComplete="one-time-code"
                 placeholder="Enter the 6-digit code"
                 value={code}
                 onChange={(e) => setCode(e.target.value)}
