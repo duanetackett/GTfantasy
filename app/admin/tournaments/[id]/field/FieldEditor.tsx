@@ -80,6 +80,29 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     });
   }
 
+  async function handleWithdrawToggle(row: GolferRow) {
+    if (!row.id) return;
+    const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        golferId: row.id,
+        name: row.name,
+        hdcp: row.hdcp,
+        pegtPlayerId: row.pegtPlayerId ?? null,
+        withdrawn: !row.withdrawn,
+      }),
+    });
+    if (res.ok) {
+      setGroups((prev) =>
+        prev.map((g) =>
+          g.map((r) => (r.id === row.id ? { ...r, withdrawn: !row.withdrawn } : r))
+        )
+      );
+      router.refresh();
+    }
+  }
+
   async function saveInlineEdit(golferId: string, withdrawnOverride?: boolean) {
     const edit = inlineEdits[golferId];
     if (!edit || !edit.name.trim()) return;
@@ -282,18 +305,6 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                           {editing.saving ? "Saving…" : "Save"}
                         </button>
                         <button
-                          onClick={() => saveInlineEdit(row.id!, !row.withdrawn)}
-                          disabled={editing.saving}
-                          title={row.withdrawn ? "Restore golfer" : "Mark as withdrawn — no replacement"}
-                          className={`px-2 py-1 rounded text-xs font-medium transition disabled:opacity-50 ${
-                            row.withdrawn
-                              ? "bg-green-100 text-green-700 hover:bg-green-200"
-                              : "bg-red-100 text-red-700 hover:bg-red-200"
-                          }`}
-                        >
-                          {row.withdrawn ? "Restore" : "Withdraw"}
-                        </button>
-                        <button
                           onClick={() => cancelInlineEdit(row.id!)}
                           className="px-2 py-1 rounded text-xs text-gray-500 hover:bg-gray-200 transition"
                         >
@@ -338,15 +349,28 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                       disabled={locked}
                       className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     />
-                    {/* Per-golfer edit button — only for saved golfers (have an id) */}
+                    {/* Per-golfer action buttons — only for saved golfers */}
                     {row.id && row.name && !locked && (
-                      <button
-                        onClick={() => startInlineEdit(row)}
-                        title="Edit this golfer without deleting picks"
-                        className="opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition text-sm"
-                      >
-                        ✏️
-                      </button>
+                      <>
+                        <button
+                          onClick={() => startInlineEdit(row)}
+                          title="Edit name / handicap"
+                          className="opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition text-sm"
+                        >
+                          ✏️
+                        </button>
+                        <button
+                          onClick={() => handleWithdrawToggle(row)}
+                          title={row.withdrawn ? "Restore golfer" : "Mark as withdrawn"}
+                          className={`opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-xs font-medium transition ${
+                            row.withdrawn
+                              ? "text-green-600 hover:bg-green-50"
+                              : "text-red-500 hover:bg-red-50"
+                          }`}
+                        >
+                          {row.withdrawn ? "Restore" : "WD"}
+                        </button>
+                      </>
                     )}
                   </div>
                 );
