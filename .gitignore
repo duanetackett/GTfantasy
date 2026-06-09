@@ -43,6 +43,9 @@ next-env.d.ts
 # database backups
 scripts/backups/
 
+# claude local settings (may contain credentials in allowed commands)
+.claude/settings.local.json
+
 /app/generated/prisma
 
 .vercel
