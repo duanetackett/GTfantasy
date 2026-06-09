@@ -117,9 +117,13 @@ export default function RulesPage() {
         </div>
         <div className="px-6 py-5 text-sm text-gray-800 leading-relaxed space-y-3">
           <p>
-            If your golfer <strong>no-shows for the qualifier</strong>, you will have the option to pick another golfer.
-            If you are not at the event, you will have a limited time to contact us — watch Facebook for no-show notifications.
-            If you cannot be reached in time, your entry will be <strong>void and your money refunded</strong>.
+            If a golfer no-shows for the qualifier, you will have the option to pick another golfer before qualifying begins.
+            If you picked a golfer that is either <strong>replaced or withdrawn</strong> (no replacement), the app will notify you
+            on the dashboard that you need to check your picks.
+          </p>
+          <p>
+            If the withdrawn golfer is <strong>replaced</strong>, you will get the new golfer if you don't pick a new one.
+            If the golfer is <strong>not replaced</strong> and you don't pick a new one, your entry will be <strong>void and your money refunded</strong>.
           </p>
           <p>
             If your golfer <strong>no-shows for Sunday Match Play</strong>, they will score as last place in their respective bracket.
