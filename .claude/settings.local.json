@@ -56,7 +56,13 @@
       "Bash(npm uninstall *)",
       "Bash(mkdir -p \"C:\\\\users\\\\crtck\\\\goldentee\\\\app\\\\login\\\\[[...rest]]\")",
       "Bash(mkdir -p \"C:\\\\users\\\\crtck\\\\goldentee\\\\app\\\\register\\\\[[...rest]]\")",
-      "Bash(vercel *)"
+      "Bash(vercel *)",
+      "PowerShell(Get-ChildItem \"C:\\\\users\\\\crtck\\\\goldentee\" -Depth 0 | Where-Object { $_.Name -ne \"node_modules\" } | Select-Object -ExpandProperty Name)",
+      "Bash(npx next *)",
+      "Bash(git diff *)",
+      "Bash(npm list *)",
+      "Bash(Get-ChildItem -Path \"C:\\\\users\\\\crtck\\\\goldentee\" -Recurse -Directory)",
+      "Bash(Select-Object -ExpandProperty FullName)"
     ]
   }
 }

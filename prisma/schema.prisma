@@ -91,10 +91,11 @@ model Entry {
 }
 
 model Pick {
-  id       String  @id @default(cuid())
-  entryId  String
-  groupId  String
-  golferId String
+  id                  String  @id @default(cuid())
+  entryId             String
+  groupId             String
+  golferId            String
+  originalGolferName  String? // set when golfer is replaced after this pick was made
   entry    Entry   @relation(fields: [entryId], references: [id], onDelete: Cascade)
   group    Group   @relation(fields: [groupId], references: [id], onDelete: Cascade)
   golfer   Golfer  @relation(fields: [golferId], references: [id], onDelete: Cascade)

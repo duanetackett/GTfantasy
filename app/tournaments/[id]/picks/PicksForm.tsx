@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null };
 type Group = { id: string; groupNumber: number; golfers: Golfer[] };
 type Tournament = { id: string; name: string; groups: Group[] };
-type Pick = { groupId: string; golferId: string };
+type Pick = { groupId: string; golferId: string; originalGolferName?: string | null };
 type Entry = { id: string; entryName: string; picks: Pick[] };
 
 function toDisplayName(name: string): string {
@@ -16,6 +16,14 @@ function toDisplayName(name: string): string {
 function picksToMap(picks: Pick[]): Record<string, string> {
   const map: Record<string, string> = {};
   for (const p of picks) map[p.groupId] = p.golferId;
+  return map;
+}
+
+function replacementsMap(picks: Pick[]): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const p of picks) {
+    if (p.originalGolferName) map[p.golferId] = p.originalGolferName;
+  }
   return map;
 }
 
@@ -36,6 +44,9 @@ export default function PicksForm({
   const [activeIdx, setActiveIdx] = useState(0);
   const [pickMaps, setPickMaps] = useState<Record<string, string>[]>(
     entries.map((e) => picksToMap(e.picks))
+  );
+  const [replacedMaps] = useState<Record<string, string>[]>(
+    entries.map((e) => replacementsMap(e.picks))
   );
   const [saving, setSaving] = useState(false);
   const [deleting, setDeleting] = useState(false);
@@ -255,20 +266,37 @@ export default function PicksForm({
         </button>
       </div>
 
+      {/* Replacement banner */}
+      {Object.keys(replacedMaps[activeIdx] ?? {}).length > 0 && (
+        <div className="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800 print:hidden">
+          <span className="text-lg leading-none mt-0.5">⚠️</span>
+          <p>
+            <strong>One or more of your picks were replaced</strong> due to a golfer withdrawal.
+            Names shown in <span className="text-red-600 font-semibold">red</span> were not your original selection — please review and update if needed.
+          </p>
+        </div>
+      )}
+
       {/* Groups */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 print:hidden">
         {tournament.groups.map((group) => {
           const selectedId = activePicks[group.id];
+          const activeReplacements = replacedMaps[activeIdx] ?? {};
           return (
             <div key={group.id} className="bg-white rounded-xl shadow p-3 text-gray-900">
               <h4 className="font-semibold text-gray-700 text-sm mb-2 border-b pb-1.5">Group {group.groupNumber}</h4>
               <div className="space-y-0.5">
-                {group.golfers.map((golfer) => (
+                {group.golfers.map((golfer) => {
+                  const isReplaced = selectedId === golfer.id && !!activeReplacements[golfer.id];
+                  const originalName = activeReplacements[golfer.id];
+                  return (
                   <label
                     key={golfer.id}
                     className={`flex items-center gap-2 px-2 py-2 sm:py-1 rounded-lg cursor-pointer transition ${
                       selectedId === golfer.id
-                        ? "bg-green-50 border border-green-400"
+                        ? isReplaced
+                          ? "bg-red-50 border border-red-400"
+                          : "bg-green-50 border border-green-400"
                         : "border border-transparent hover:bg-gray-50 print:hidden"
                     }`}
                   >
@@ -280,7 +308,13 @@ export default function PicksForm({
                       onChange={() => setPick(group.id, golfer.id)}
                       className="accent-green-600 w-4 h-4 shrink-0 print:hidden"
                     />
-                    <span className="text-base sm:text-sm font-semibold flex-1">{toDisplayName(golfer.name)}</span>
+                    <span
+                      className={`text-base sm:text-sm font-semibold flex-1 ${isReplaced ? "text-red-600" : ""}`}
+                      title={isReplaced ? `Originally: ${toDisplayName(originalName!)} — replaced due to withdrawal` : undefined}
+                    >
+                      {toDisplayName(golfer.name)}
+                      {isReplaced && <span className="ml-1 text-xs font-normal text-red-400">(replaced)</span>}
+                    </span>
                     <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0 print:hidden">
                       {golfer.hdcp != null && (
                         <span className="text-xs font-bold text-gray-400 w-12 text-center tabular-nums">{golfer.hdcp.toFixed(2)}</span>
@@ -298,7 +332,8 @@ export default function PicksForm({
                       )}
                     </div>
                   </label>
-                ))}
+                  );
+                })}
               </div>
             </div>
           );

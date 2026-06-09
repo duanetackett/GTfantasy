@@ -113,7 +113,7 @@ export default function RulesPage() {
       {/* No-Shows */}
       <section className="bg-white rounded-xl shadow-md overflow-hidden">
         <div className="bg-gray-700 px-6 py-3">
-          <h2 className="font-bold text-white tracking-wide uppercase text-sm">No-Show Policy</h2>
+          <h2 className="font-bold text-white tracking-wide uppercase text-sm">Golfer No-Shows</h2>
         </div>
         <div className="px-6 py-5 text-sm text-gray-800 leading-relaxed space-y-3">
           <p>
@@ -127,51 +127,6 @@ export default function RulesPage() {
         </div>
       </section>
 
-      {/* Payouts */}
-      <section className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="bg-gray-700 px-6 py-3">
-          <h2 className="font-bold text-white tracking-wide uppercase text-sm">Payouts</h2>
-        </div>
-        <div className="px-6 py-5 text-sm text-gray-800">
-          <p className="mb-4 leading-relaxed">
-            The prize pool is <strong>$35 per qualifying entry</strong>. Tied entries split the combined prize money for the positions they share.
-          </p>
-          <table className="w-full border-collapse">
-            <thead>
-              <tr className="bg-gray-100 border-b-2 border-gray-300">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide">Place</th>
-                <th className="text-center px-4 py-2 text-xs font-semibold text-gray-600 uppercase tracking-wide w-32">Payout</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              <tr className="bg-white">
-                <td className="px-4 py-3 font-medium">1st Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">40% of Prize Pool</td>
-              </tr>
-              <tr className="bg-gray-50">
-                <td className="px-4 py-3 font-medium">2nd Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">30% of Prize Pool</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-3 font-medium">3rd Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">20% of Prize Pool</td>
-              </tr>
-              <tr className="bg-gray-50">
-                <td className="px-4 py-3 font-medium">4th Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">10% of Prize Pool</td>
-              </tr>
-              <tr className="bg-white">
-                <td className="px-4 py-3 font-medium">Last Place</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">Donation Returned</td>
-              </tr>
-              <tr className="bg-gray-50">
-                <td className="px-4 py-3 font-medium">Disqualified Entry</td>
-                <td className="px-4 py-3 text-center font-bold text-green-700">Donation Returned</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </section>
     </div>
   );
 }

@@ -83,10 +83,21 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   });
   if (!golfer) return NextResponse.json({ error: "Golfer not found." }, { status: 404 });
 
+  const newName = name.trim().toUpperCase();
+  const nameChanged = newName !== golfer.name;
+
+  // If the name is changing, stamp existing picks so users can see the replacement
+  if (nameChanged) {
+    await prisma.pick.updateMany({
+      where: { golferId, originalGolferName: null },
+      data: { originalGolferName: golfer.name },
+    });
+  }
+
   const updated = await prisma.golfer.update({
     where: { id: golferId },
     data: {
-      name: name.trim().toUpperCase(),
+      name: newName,
       hdcp: hdcp !== "" ? parseFloat(hdcp) : null,
       pegtPlayerId: pegtPlayerId ?? null,
     },

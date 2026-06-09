@@ -27,7 +27,7 @@ export default async function PicksPage({ params }: { params: Promise<{ id: stri
   // Load all entries for this user in this tournament, with their picks
   const entries = await prisma.entry.findMany({
     where: { userId: session.user.id, tournamentId: id },
-    include: { picks: true },
+    include: { picks: { select: { groupId: true, golferId: true, originalGolferName: true } } },
     orderBy: { createdAt: "asc" },
   });
 
