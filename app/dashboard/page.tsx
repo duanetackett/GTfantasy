@@ -37,6 +37,16 @@ export default async function DashboardPage() {
       : Promise.resolve([]),
   ]);
 
+  const openTournament = tournaments.find((t) => t.status === "PICKS_OPEN");
+  const hasReplacedPicks = openTournament && session?.user?.id
+    ? (await prisma.pick.count({
+        where: {
+          entry: { userId: session.user.id, tournamentId: openTournament.id },
+          originalGolferName: { not: null },
+        },
+      })) > 0
+    : false;
+
   // For rank calculation, fetch all entries per tournament the user participated in
   const tournamentIds = [...new Set(myEntries.map((e) => e.tournamentId))];
   const allEntriesByTournament = tournamentIds.length
@@ -69,7 +79,7 @@ export default async function DashboardPage() {
         />
       </a>
 
-      <TournamentSelector tournaments={tournaments} />
+      <TournamentSelector tournaments={tournaments} hasReplacedPicks={hasReplacedPicks} />
 
       <MySummary entries={myEntries.map((entry) => {
         const allForTourney = entriesByTournament.get(entry.tournamentId) ?? [];

@@ -28,7 +28,7 @@ function tournamentLink(id: string, status: string): string | null {
   }
 }
 
-export default function TournamentSelector({ tournaments }: { tournaments: TournamentRecord[] }) {
+export default function TournamentSelector({ tournaments, hasReplacedPicks }: { tournaments: TournamentRecord[]; hasReplacedPicks: boolean }) {
   const router = useRouter();
   const [selectedYear, setSelectedYear] = useState(CURRENT_YEAR);
   const [selectedName, setSelectedName] = useState("");
@@ -58,6 +58,17 @@ export default function TournamentSelector({ tournaments }: { tournaments: Tourn
 
   return (
     <div className="flex flex-col items-center w-full max-w-md">
+      {openTournament && hasReplacedPicks && (
+        <div className="w-full mb-3 flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800">
+          <span className="text-lg leading-none mt-0.5">⚠️</span>
+          <p>
+            <strong>One or more of your picks were replaced</strong> due to a golfer withdrawal.{" "}
+            <a href={`/tournaments/${openTournament.id}/picks`} className="underline font-semibold hover:text-amber-900">
+              Review your picks →
+            </a>
+          </p>
+        </div>
+      )}
       {openTournament && (
         <div className="w-full mb-8 bg-green-900/50 border border-green-500/50 rounded-xl px-6 py-4 text-center">
           <p className="text-green-300 text-sm font-semibold uppercase tracking-wide mb-1">Picks Open</p>
