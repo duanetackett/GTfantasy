@@ -61,6 +61,7 @@ model Golfer {
   name                  String
   hdcp                  Float?
   pegtPlayerId          Int?
+  withdrawn             Boolean  @default(false)
   qualifyingRank        Int?
   qualifyingBracket     String?
   finalPosition         Int?

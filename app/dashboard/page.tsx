@@ -42,7 +42,10 @@ export default async function DashboardPage() {
     ? (await prisma.pick.count({
         where: {
           entry: { userId: session.user.id, tournamentId: openTournament.id },
-          originalGolferName: { not: null },
+          OR: [
+            { originalGolferName: { not: null } },
+            { golfer: { withdrawn: true } },
+          ],
         },
       })) > 0
     : false;

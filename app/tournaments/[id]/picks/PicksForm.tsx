@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null };
+type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null; withdrawn: boolean };
 type Group = { id: string; groupNumber: number; golfers: Golfer[] };
 type Tournament = { id: string; name: string; groups: Group[] };
 type Pick = { groupId: string; golferId: string; originalGolferName?: string | null };
@@ -266,16 +266,25 @@ export default function PicksForm({
         </button>
       </div>
 
-      {/* Replacement banner */}
-      {Object.keys(replacedMaps[activeIdx] ?? {}).length > 0 && (
-        <div className="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800 print:hidden">
-          <span className="text-lg leading-none mt-0.5">⚠️</span>
-          <p>
-            <strong>One or more of your picks were replaced</strong> due to a golfer withdrawal.
-            Names shown in <span className="text-red-600 font-semibold">red</span> were not your original selection — please review and update if needed.
-          </p>
-        </div>
-      )}
+      {/* Replacement / withdrawal banner */}
+      {(() => {
+        const activeReplacements = replacedMaps[activeIdx] ?? {};
+        const hasReplaced = Object.keys(activeReplacements).length > 0;
+        const hasWithdrawn = tournament.groups.some((g) => {
+          const selectedId = pickMaps[activeIdx]?.[g.id];
+          return selectedId && g.golfers.find((gf) => gf.id === selectedId)?.withdrawn;
+        });
+        if (!hasReplaced && !hasWithdrawn) return null;
+        return (
+          <div className="mb-4 flex items-start gap-3 bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 text-sm text-amber-800 print:hidden">
+            <span className="text-lg leading-none mt-0.5">⚠️</span>
+            <p>
+              <strong>One or more of your picks need attention</strong> due to a golfer withdrawal.
+              Names shown in <span className="text-red-600 font-semibold">red</span> require a new selection — please review and update your picks.
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Groups */}
       <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 print:hidden">
@@ -287,16 +296,21 @@ export default function PicksForm({
               <h4 className="font-semibold text-gray-700 text-sm mb-2 border-b pb-1.5">Group {group.groupNumber}</h4>
               <div className="space-y-0.5">
                 {group.golfers.map((golfer) => {
-                  const isReplaced = selectedId === golfer.id && !!activeReplacements[golfer.id];
+                  const isSelected = selectedId === golfer.id;
+                  const isReplaced = isSelected && !!activeReplacements[golfer.id];
+                  const isWithdrawn = isSelected && golfer.withdrawn;
+                  const isAlert = isReplaced || isWithdrawn;
                   const originalName = activeReplacements[golfer.id];
                   return (
                   <label
                     key={golfer.id}
                     className={`flex items-center gap-2 px-2 py-2 sm:py-1 rounded-lg cursor-pointer transition ${
-                      selectedId === golfer.id
-                        ? isReplaced
+                      isSelected
+                        ? isAlert
                           ? "bg-red-50 border border-red-400"
                           : "bg-green-50 border border-green-400"
+                        : golfer.withdrawn
+                        ? "border border-transparent opacity-40"
                         : "border border-transparent hover:bg-gray-50 print:hidden"
                     }`}
                   >
@@ -304,16 +318,18 @@ export default function PicksForm({
                       type="radio"
                       name={`group-${group.id}-entry-${activeIdx}`}
                       value={golfer.id}
-                      checked={selectedId === golfer.id}
+                      checked={isSelected}
                       onChange={() => setPick(group.id, golfer.id)}
+                      disabled={golfer.withdrawn && !isSelected}
                       className="accent-green-600 w-4 h-4 shrink-0 print:hidden"
                     />
                     <span
-                      className={`text-base sm:text-sm font-semibold flex-1 ${isReplaced ? "text-red-600" : ""}`}
-                      title={isReplaced ? `Originally: ${toDisplayName(originalName!)} — replaced due to withdrawal` : undefined}
+                      className={`text-base sm:text-sm font-semibold flex-1 ${isAlert ? "text-red-600" : golfer.withdrawn ? "line-through text-gray-400" : ""}`}
+                      title={isReplaced ? `Originally: ${toDisplayName(originalName!)} — replaced due to withdrawal` : isWithdrawn ? "This golfer has withdrawn" : undefined}
                     >
                       {toDisplayName(golfer.name)}
                       {isReplaced && <span className="ml-1 text-xs font-normal text-red-400">(replaced)</span>}
+                      {isWithdrawn && <span className="ml-1 text-xs font-normal text-red-400">(withdrawn)</span>}
                     </span>
                     <div className="flex items-center gap-2 pl-2 border-l border-gray-200 shrink-0 print:hidden">
                       {golfer.hdcp != null && (

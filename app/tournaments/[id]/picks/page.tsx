@@ -13,7 +13,7 @@ export default async function PicksPage({ params }: { params: Promise<{ id: stri
     include: {
       groups: {
         orderBy: { groupNumber: "asc" },
-        include: { golfers: { orderBy: { name: "asc" }, select: { id: true, name: true, hdcp: true, pegtPlayerId: true } } },
+        include: { golfers: { orderBy: { name: "asc" }, select: { id: true, name: true, hdcp: true, pegtPlayerId: true, withdrawn: true } } },
       },
     },
   });

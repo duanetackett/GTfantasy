@@ -3,11 +3,11 @@
 import { useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
-type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null };
+type Golfer = { id: string; name: string; hdcp: number | null; pegtPlayerId: number | null; withdrawn: boolean };
 type Group = { id: string; groupNumber: number; golfers: Golfer[] };
 type Tournament = { id: string; name: string; groups: Group[] };
 
-type GolferRow = { id?: string; name: string; hdcp: string; pegtPlayerId?: number | null };
+type GolferRow = { id?: string; name: string; hdcp: string; pegtPlayerId?: number | null; withdrawn?: boolean };
 
 function normalizeName(name: string) {
   return name
@@ -37,7 +37,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     for (let g = 1; g <= 8; g++) {
       const existing = tournament.groups.find((gr) => gr.groupNumber === g);
       const rows: GolferRow[] = existing
-        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name.toUpperCase(), hdcp: gf.hdcp != null ? gf.hdcp.toFixed(2) : "", pegtPlayerId: gf.pegtPlayerId }))
+        ? existing.golfers.map((gf) => ({ id: gf.id, name: gf.name.toUpperCase(), hdcp: gf.hdcp != null ? gf.hdcp.toFixed(2) : "", pegtPlayerId: gf.pegtPlayerId, withdrawn: gf.withdrawn }))
         : [];
       while (rows.length < 8) rows.push({ name: "", hdcp: "" });
       result.push(rows);
@@ -80,7 +80,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     });
   }
 
-  async function saveInlineEdit(golferId: string) {
+  async function saveInlineEdit(golferId: string, withdrawnOverride?: boolean) {
     const edit = inlineEdits[golferId];
     if (!edit || !edit.name.trim()) return;
 
@@ -94,7 +94,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ golferId, name: upperName, hdcp: edit.hdcp, pegtPlayerId: pegtId }),
+      body: JSON.stringify({ golferId, name: upperName, hdcp: edit.hdcp, pegtPlayerId: pegtId, withdrawn: withdrawnOverride }),
     });
 
     const data = await res.json();
@@ -103,7 +103,11 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
     } else {
       setGroups((prev) =>
         prev.map((g) =>
-          g.map((row) => (row.id === golferId ? { ...row, name: upperName, hdcp: fmtHdcp(edit.hdcp) } : row))
+          g.map((row) =>
+            row.id === golferId
+              ? { ...row, name: upperName, hdcp: fmtHdcp(edit.hdcp), withdrawn: withdrawnOverride ?? row.withdrawn }
+              : row
+          )
         )
       );
       cancelInlineEdit(golferId);
@@ -278,6 +282,18 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                           {editing.saving ? "Saving…" : "Save"}
                         </button>
                         <button
+                          onClick={() => saveInlineEdit(row.id!, !row.withdrawn)}
+                          disabled={editing.saving}
+                          title={row.withdrawn ? "Restore golfer" : "Mark as withdrawn — no replacement"}
+                          className={`px-2 py-1 rounded text-xs font-medium transition disabled:opacity-50 ${
+                            row.withdrawn
+                              ? "bg-green-100 text-green-700 hover:bg-green-200"
+                              : "bg-red-100 text-red-700 hover:bg-red-200"
+                          }`}
+                        >
+                          {row.withdrawn ? "Restore" : "Withdraw"}
+                        </button>
+                        <button
                           onClick={() => cancelInlineEdit(row.id!)}
                           className="px-2 py-1 rounded text-xs text-gray-500 hover:bg-gray-200 transition"
                         >
@@ -291,16 +307,18 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
 
                 // Normal row
                 return (
-                  <div key={row.id ?? idx} className="flex gap-1 items-center group">
+                  <div key={row.id ?? idx} className={`flex gap-1 items-center group ${row.withdrawn ? "opacity-60" : ""}`}>
                     <div className="relative flex-1 min-w-0">
                       <input
                         type="text"
                         placeholder={`Golfer ${idx + 1}`}
-                        value={row.name}
+                        value={row.withdrawn ? `${row.name} (withdrawn)` : row.name}
                         onChange={(e) => updateGolfer(gi, idx, "name", e.target.value)}
-                        disabled={locked}
-                        className={`w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed ${
-                          invalid
+                        disabled={locked || !!row.withdrawn}
+                        className={`w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 disabled:bg-gray-50 disabled:cursor-not-allowed ${
+                          row.withdrawn
+                            ? "line-through text-red-400 border-red-200"
+                            : invalid
                             ? "border-red-400 bg-red-50 focus:ring-red-400"
                             : "border-gray-200 focus:ring-green-500"
                         }`}

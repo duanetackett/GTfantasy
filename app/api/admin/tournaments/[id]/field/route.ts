@@ -66,11 +66,12 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
   }
 
   const { id } = await params;
-  const { golferId, name, hdcp, pegtPlayerId } = await req.json() as {
+  const { golferId, name, hdcp, pegtPlayerId, withdrawn } = await req.json() as {
     golferId: string;
     name: string;
     hdcp: string;
     pegtPlayerId?: number | null;
+    withdrawn?: boolean;
   };
 
   if (!golferId || !name?.trim()) {
@@ -85,9 +86,10 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
 
   const newName = name.trim().toUpperCase();
   const nameChanged = newName !== golfer.name;
+  const isWithdrawing = withdrawn === true && !golfer.withdrawn;
 
-  // If the name is changing, stamp existing picks so users can see the replacement
-  if (nameChanged) {
+  // Stamp existing picks when golfer name changes or golfer is being withdrawn
+  if (nameChanged || isWithdrawing) {
     await prisma.pick.updateMany({
       where: { golferId, originalGolferName: null },
       data: { originalGolferName: golfer.name },
@@ -100,6 +102,7 @@ export async function PATCH(req: NextRequest, { params }: { params: Promise<{ id
       name: newName,
       hdcp: hdcp !== "" ? parseFloat(hdcp) : null,
       pegtPlayerId: pegtPlayerId ?? null,
+      withdrawn: withdrawn ?? golfer.withdrawn,
     },
   });
 
