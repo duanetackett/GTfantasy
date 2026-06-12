@@ -10,7 +10,7 @@ export default async function AssignEntriesPage() {
   const session = await auth();
   if (session?.user?.role !== "ADMIN") redirect("/dashboard");
 
-  const [entries, users] = await Promise.all([
+  const [rawEntries, users] = await Promise.all([
     prisma.entry.findMany({
       where: {
         userId: null,
@@ -21,13 +21,16 @@ export default async function AssignEntriesPage() {
         entryName: true,
         tournament: { select: { id: true, name: true, year: true } },
       },
-      orderBy: { entryName: "asc" },
     }),
     prisma.user.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true, email: true },
     }),
   ]);
+
+  const entries = rawEntries.sort((a, b) =>
+    a.entryName.localeCompare(b.entryName, undefined, { sensitivity: "base" })
+  );
 
   return (
     <div>
