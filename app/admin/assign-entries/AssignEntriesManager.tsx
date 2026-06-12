@@ -144,9 +144,9 @@ export default function AssignEntriesManager({
           </div>
 
           {/* Entry table */}
-          <div className="rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+          <div className="rounded-xl border border-gray-200 shadow-sm overflow-hidden overflow-y-auto max-h-[60vh]">
             <table className="w-full text-sm">
-              <thead>
+              <thead className="sticky top-0 z-10">
                 <tr className="bg-gray-100 border-b-2 border-gray-300 text-xs font-semibold text-gray-500 uppercase tracking-wide">
                   <th className="px-4 py-3 w-10">
                     <input
