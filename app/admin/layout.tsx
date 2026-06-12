@@ -13,6 +13,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           <Link href="/admin/users" className="text-green-400 font-medium hover:text-green-300 transition">
             Users
           </Link>
+          <Link href="/admin/assign-entries" className="text-green-400 font-medium hover:text-green-300 transition">
+            Assign Entries
+          </Link>
           <Link href="/dashboard" className="text-gray-400 hover:text-white transition">
             ← Back to Dashboard
           </Link>
