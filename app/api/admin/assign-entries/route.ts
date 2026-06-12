@@ -30,3 +30,24 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ ok: true, count: result.count, userName: user.name });
 }
+
+export async function DELETE(req: NextRequest) {
+  const session = await auth();
+  if (session?.user?.role !== "ADMIN") {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const body = await req.json();
+  const { entryIds } = body;
+
+  if (!Array.isArray(entryIds) || entryIds.length === 0) {
+    return NextResponse.json({ error: "No entries selected." }, { status: 400 });
+  }
+
+  const result = await prisma.entry.updateMany({
+    where: { id: { in: entryIds }, userId: { not: null } },
+    data: { userId: null },
+  });
+
+  return NextResponse.json({ ok: true, count: result.count });
+}
