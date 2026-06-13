@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useMemo } from "react";
 
 type User = {
   id: string;
@@ -22,13 +22,65 @@ function formatLastLogin(value: string | Date | null): string {
   });
 }
 
+type SortCol = "name" | "email" | "entries" | "lastLogin" | "role";
+
+function SortHeader({
+  col, label, sort, onSort, align = "left",
+}: {
+  col: SortCol; label: string; sort: { col: SortCol; dir: "asc" | "desc" };
+  onSort: (col: SortCol) => void; align?: "left" | "center";
+}) {
+  const active = sort.col === col;
+  return (
+    <th className={`px-4 py-3 text-${align}`}>
+      <button
+        onClick={() => onSort(col)}
+        className={`inline-flex items-center gap-1 uppercase tracking-wide text-xs font-semibold transition ${
+          active ? "text-green-700" : "text-gray-500 hover:text-gray-700"
+        }`}
+      >
+        {label}
+        <span className="text-[10px]">
+          {active ? (sort.dir === "asc" ? "▲" : "▼") : "⇅"}
+        </span>
+      </button>
+    </th>
+  );
+}
+
 export default function UserManager({ initialUsers }: { initialUsers: User[] }) {
   const [users, setUsers] = useState<User[]>(initialUsers);
+  const [sort, setSort] = useState<{ col: SortCol; dir: "asc" | "desc" }>({ col: "name", dir: "asc" });
   const [loadingId, setLoadingId] = useState<string | null>(null);
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
 
   const [expandedUserId, setExpandedUserId] = useState<string | null>(null);
+  const sortedUsers = useMemo(() => {
+    const dir = sort.dir === "asc" ? 1 : -1;
+    return [...users].sort((a, b) => {
+      switch (sort.col) {
+        case "name":
+          return dir * a.name.localeCompare(b.name, undefined, { sensitivity: "base" });
+        case "email":
+          return dir * a.email.localeCompare(b.email, undefined, { sensitivity: "base" });
+        case "entries":
+          return dir * (a._count.entries - b._count.entries);
+        case "lastLogin": {
+          const ta = a.lastLoginAt ? new Date(a.lastLoginAt).getTime() : -Infinity;
+          const tb = b.lastLoginAt ? new Date(b.lastLoginAt).getTime() : -Infinity;
+          return dir * (ta - tb);
+        }
+        case "role":
+          return dir * a.role.localeCompare(b.role);
+      }
+    });
+  }, [users, sort]);
+
+  function toggleSort(col: SortCol) {
+    setSort((prev) => prev.col === col ? { col, dir: prev.dir === "asc" ? "desc" : "asc" } : { col, dir: "asc" });
+  }
+
   const [showCreate, setShowCreate] = useState(false);
   const [createForm, setCreateForm] = useState({ firstName: "", lastName: "", email: "", password: "" });
   const [showCreatePassword, setShowCreatePassword] = useState(false);
@@ -213,7 +265,7 @@ export default function UserManager({ initialUsers }: { initialUsers: User[] }) 
 
       {/* Mobile: accordion cards */}
       <div className="sm:hidden flex flex-col divide-y divide-gray-200 rounded-xl border border-gray-200 shadow-sm overflow-hidden">
-        {users.map((user, i) => {
+        {sortedUsers.map((user, i) => {
           const isOpen = expandedUserId === user.id;
           return (
             <div key={user.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
@@ -265,17 +317,17 @@ export default function UserManager({ initialUsers }: { initialUsers: User[] }) 
       <div className="hidden sm:block rounded-xl border border-gray-200 shadow-sm overflow-hidden">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-gray-100 border-b-2 border-gray-300 text-xs font-semibold text-gray-500 uppercase tracking-wide">
-              <th className="text-left px-4 py-3">Name</th>
-              <th className="text-left px-4 py-3">Email</th>
-              <th className="text-center px-4 py-3">Entries</th>
-              <th className="text-center px-4 py-3">Last Login</th>
-              <th className="text-center px-4 py-3">Role</th>
-              <th className="text-center px-4 py-3">Actions</th>
+            <tr className="bg-gray-100 border-b-2 border-gray-300">
+              <SortHeader col="name"      label="Name"       sort={sort} onSort={toggleSort} />
+              <SortHeader col="email"     label="Email"      sort={sort} onSort={toggleSort} />
+              <SortHeader col="entries"   label="Entries"    sort={sort} onSort={toggleSort} align="center" />
+              <SortHeader col="lastLogin" label="Last Login" sort={sort} onSort={toggleSort} align="center" />
+              <SortHeader col="role"      label="Role"       sort={sort} onSort={toggleSort} align="center" />
+              <th className="text-center px-4 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wide">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {users.map((user, i) => (
+            {sortedUsers.map((user, i) => (
               <tr key={user.id} className={i % 2 === 0 ? "bg-white" : "bg-gray-50"}>
                 <td className="px-4 py-3 font-medium text-gray-800">{user.name}</td>
                 <td className="px-4 py-3 text-gray-600">{user.email}</td>
