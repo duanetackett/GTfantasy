@@ -23,7 +23,7 @@ function RankBadge({ rank, total }: { rank: string; total: number }) {
   return (
     <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${bg}`}>
       {rank}
-      <span className="font-normal opacity-60">/{total}</span>
+      <span className="font-normal">/{total}</span>
     </span>
   );
 }
