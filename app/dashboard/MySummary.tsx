@@ -14,11 +14,11 @@ type SummaryEntry = {
 
 function RankBadge({ rank, total }: { rank: string; total: number }) {
   const num = parseInt(rank.replace("T", ""));
-  let bg = "bg-gray-100 text-gray-500";
-  if (num === 1) bg = "bg-amber-400 text-amber-900";
-  else if (num === 2) bg = "bg-slate-300 text-slate-700";
+  let bg = "bg-gray-100 text-gray-900";
+  if (num === 1) bg = "bg-amber-400 text-gray-900";
+  else if (num === 2) bg = "bg-slate-300 text-gray-900";
   else if (num === 3) bg = "bg-amber-700/80 text-amber-100";
-  else if (num <= Math.ceil(total * 0.25)) bg = "bg-green-100 text-green-700";
+  else if (num <= Math.ceil(total * 0.25)) bg = "bg-green-100 text-gray-900";
 
   return (
     <span className={`inline-flex items-center gap-0.5 px-2 py-0.5 rounded-full text-xs font-bold ${bg}`}>
