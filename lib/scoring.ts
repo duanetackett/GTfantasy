@@ -248,10 +248,11 @@ export async function saveScores(tournamentId: string, scores: GolferScore[]): P
 
   await Promise.all(
     entries.map((entry) => {
-      const isDQ = entry.picks.length < 8 || entry.picks.some((pick) => pick.golfer.finalScore === null);
-      const total = isDQ
-        ? null
-        : entry.picks.reduce((sum, pick) => sum + (pick.golfer.finalScore ?? 0), 0);
+      const isDQ = entry.picks.length < 8 || entry.picks.some((pick) => pick.golfer.finalPosition === 0);
+      const allScored = !isDQ && entry.picks.every((pick) => pick.golfer.finalScore !== null);
+      const total = allScored
+        ? entry.picks.reduce((sum, pick) => sum + (pick.golfer.finalScore ?? 0), 0)
+        : null;
       return prisma.entry.update({
         where: { id: entry.id },
         data: { totalPoints: total, disqualified: isDQ },
