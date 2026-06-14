@@ -93,29 +93,34 @@ export default function ManualScoringForm({
     setError("");
     setMessage("");
 
-    const scores = golfers.map((g) => {
-      const e = entries[g.id];
-      const coursesCount = parseInt(e.coursesWon || "0") || 0;
-      const qRank = e.qualifyingRank ? parseInt(e.qualifyingRank) : null;
-      const total = calcTotal(e);
-      return {
-        golferId: g.id,
-        golferName: g.name,
-        groupNumber: g.groupNumber,
-        isDNP: e.isDNP,
-        qualifyingRank: qRank,
-        qualifyingBracket: qRank ? getBracket(qRank) : null,
-        baseScore: e.isDNP ? null : parseInt(e.finalPlace) || null,
-        bonusOverallQualifier: e.topQualifier ? -6 : 0,
-        bonusCourseQualifier: coursesCount * -3,
-        coursesWon: [] as string[],
-        bonusTier: e.topFinisher ? -5 : 0,
-        bonusMainBracket: parseInt(e.mainBracket || "0") || 0,
-        bonusPurple: e.purpleWinner ? -5 : 0,
-        bonusPink: e.pinkWinner ? -3 : 0,
-        totalScore: total,
-      };
-    });
+    const scores = golfers
+      .filter((g) => {
+        const e = entries[g.id];
+        return e.isDNP || e.finalPlace.trim() !== "";
+      })
+      .map((g) => {
+        const e = entries[g.id];
+        const coursesCount = parseInt(e.coursesWon || "0") || 0;
+        const qRank = e.qualifyingRank ? parseInt(e.qualifyingRank) : null;
+        const total = calcTotal(e);
+        return {
+          golferId: g.id,
+          golferName: g.name,
+          groupNumber: g.groupNumber,
+          isDNP: e.isDNP,
+          qualifyingRank: qRank,
+          qualifyingBracket: qRank ? getBracket(qRank) : null,
+          baseScore: e.isDNP ? null : parseInt(e.finalPlace) || null,
+          bonusOverallQualifier: e.topQualifier ? -6 : 0,
+          bonusCourseQualifier: coursesCount * -3,
+          coursesWon: [] as string[],
+          bonusTier: e.topFinisher ? -5 : 0,
+          bonusMainBracket: parseInt(e.mainBracket || "0") || 0,
+          bonusPurple: e.purpleWinner ? -5 : 0,
+          bonusPink: e.pinkWinner ? -3 : 0,
+          totalScore: total,
+        };
+      });
 
     const res = await fetch(
       `/api/admin/tournaments/${tournamentId}/scores?action=manual-save`,
