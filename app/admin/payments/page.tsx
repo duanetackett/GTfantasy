@@ -44,8 +44,8 @@ export default async function PaymentsPage() {
           ← Admin Functions
         </Link>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Manage Payments</h1>
-      <p className="text-sm text-gray-500 mb-6">Track cash entry payments by tournament.</p>
+      <h1 className="text-2xl font-bold text-white mb-1">Manage Payments</h1>
+      <p className="text-sm text-gray-300 mb-6">Track cash entry payments by tournament.</p>
       <PaymentsManager tournaments={serialized} />
     </div>
   );

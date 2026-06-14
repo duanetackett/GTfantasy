@@ -71,6 +71,7 @@ export default function PaymentsManager({ tournament }: { tournament: Tournament
 
       {/* Entries table */}
       <div className="rounded-xl border border-gray-200 shadow-sm overflow-hidden">
+        <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
             <tr className="bg-gray-100 border-b border-gray-200 text-xs font-semibold text-gray-500 uppercase tracking-wide">
@@ -118,6 +119,7 @@ export default function PaymentsManager({ tournament }: { tournament: Tournament
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );

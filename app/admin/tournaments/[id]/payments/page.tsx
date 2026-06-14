@@ -44,8 +44,8 @@ export default async function TournamentPaymentsPage({ params }: { params: Promi
           ← {tournament.name} {tournament.year}
         </Link>
       </div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-1">Manage Payments</h1>
-      <p className="text-sm text-gray-500 mb-6">{tournament.name} {tournament.year} — track cash entry payments.</p>
+      <h1 className="text-2xl font-bold text-white mb-1">Manage Payments</h1>
+      <p className="text-sm text-gray-300 mb-6">{tournament.name} {tournament.year} — track cash entry payments.</p>
       <PaymentsManager tournament={serialized} />
     </div>
   );
