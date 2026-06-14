@@ -222,7 +222,7 @@ export async function saveScores(tournamentId: string, scores: GolferScore[]): P
         data: {
           qualifyingRank: s.qualifyingRank,
           qualifyingBracket: s.qualifyingBracket,
-          finalPosition: s.baseScore,
+          finalPosition: s.isDNP ? 0 : s.baseScore,
           bonusTopQualifier: s.bonusOverallQualifier,
           bonusCoursesWon: s.bonusCourseQualifier,
           coursesWon: s.coursesWon,

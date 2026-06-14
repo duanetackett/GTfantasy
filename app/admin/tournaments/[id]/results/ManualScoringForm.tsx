@@ -52,12 +52,11 @@ function calcTotal(e: ManualEntry): number | null {
 }
 
 function initEntry(g: GolferRow): ManualEntry {
-  const hasBeenScored = g.bonusTopQualifier !== null;
   const courses = g.bonusCoursesWon != null ? Math.abs(g.bonusCoursesWon) / 3 : 0;
   return {
-    isDNP: hasBeenScored && g.finalScore === null,
+    isDNP: g.finalPosition === 0,
     qualifyingRank: g.qualifyingRank?.toString() ?? "",
-    finalPlace: g.finalPosition?.toString() ?? "",
+    finalPlace: g.finalPosition ? g.finalPosition.toString() : "",
     topQualifier: g.bonusTopQualifier === -6,
     coursesWon: courses.toString(),
     topFinisher: g.bonusTopFinisher === -5,
