@@ -40,7 +40,7 @@ export default async function LeaderboardPage({ params }: { params: Promise<{ id
   const activeEntries = entries.filter((e) => !e.disqualified);
   const dqEntries    = entries.filter((e) => e.disqualified);
   const myEntries    = entries.filter((e) => e.user?.id === session.user.id);
-  const scoresCalculated = tournament.status === "COMPLETED" && entries.some((e) => e.totalPoints !== null);
+  const scoresCalculated = entries.some((e) => e.totalPoints !== null);
 
   return (
     <div>
