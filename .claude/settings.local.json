@@ -59,7 +59,10 @@
       "Bash(git diff *)",
       "Bash(npm list *)",
       "Bash(Get-ChildItem -Path \"C:\\\\users\\\\crtck\\\\goldentee\" -Recurse -Directory)",
-      "Bash(Select-Object -ExpandProperty FullName)"
+      "Bash(Select-Object -ExpandProperty FullName)",
+      "Bash(fly mpg *)",
+      "Bash(fly orgs *)",
+      "PowerShell(vercel *)"
     ]
   }
 }
