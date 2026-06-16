@@ -61,7 +61,7 @@ export default async function StatsPage({ params }: { params: Promise<{ id: stri
   });
 
   if (!tournament) notFound();
-  if (tournament.status !== "COMPLETED") redirect("/dashboard");
+  if (tournament.status !== "COMPLETED" && tournament.status !== "PICKS_LOCKED") redirect("/dashboard");
 
   const entries = await prisma.entry.findMany({
     where: { tournamentId: id },
