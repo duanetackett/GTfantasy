@@ -18,7 +18,7 @@ type Tournament = {
   entries: Entry[];
 };
 
-type SortCol = "entry" | "status" | "paidAt";
+type SortCol = "entry" | "status" | "paidAt" | "action";
 type SortDir = "asc" | "desc";
 
 function SortIcon({ active, dir }: { active: boolean; dir: SortDir }) {
@@ -61,6 +61,8 @@ export default function PaymentsManager({ tournament }: { tournament: Tournament
       const aDate = a.paidAt ? new Date(a.paidAt).getTime() : 0;
       const bDate = b.paidAt ? new Date(b.paidAt).getTime() : 0;
       cmp = aDate - bDate;
+    } else if (sortCol === "action") {
+      cmp = (a.paidAt ? 1 : 0) - (b.paidAt ? 1 : 0);
     }
     return sortDir === "asc" ? cmp : -cmp;
   });
@@ -125,7 +127,9 @@ export default function PaymentsManager({ tournament }: { tournament: Tournament
                 <th className={`text-center ${thClass}`} onClick={() => handleSort("paidAt")}>
                   Paid On <SortIcon active={sortCol === "paidAt"} dir={sortDir} />
                 </th>
-                <th className="text-center px-4 py-3">Action</th>
+                <th className={`text-center ${thClass}`} onClick={() => handleSort("action")}>
+                  Action <SortIcon active={sortCol === "action"} dir={sortDir} />
+                </th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-100">
