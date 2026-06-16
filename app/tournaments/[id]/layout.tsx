@@ -29,7 +29,7 @@ export default async function TournamentLayout({
 
   const showTabs =
     tournament?.status === "PICKS_LOCKED" || tournament?.status === "COMPLETED";
-  const showStats = tournament?.status === "COMPLETED";
+  const showStats = tournament?.status === "PICKS_LOCKED" || tournament?.status === "COMPLETED";
 
   const tabs = tournament && showTabs
     ? [
