@@ -258,7 +258,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
 
       <div className="grid gap-4" style={{ gridTemplateColumns: `repeat(auto-fill, minmax(${minCardWidth}px, 1fr))` }}>
         {groups.map((golfers, gi) => (
-          <div key={gi} className="bg-white rounded-xl shadow p-4">
+          <div key={gi} className="bg-white rounded-xl shadow p-4 text-gray-900">
             <div className="flex items-center justify-between mb-3">
               <h4 className="font-semibold text-gray-700 text-sm">Group {gi + 1}</h4>
               <span className="text-xs text-gray-400 w-20 text-center">HDCP</span>
@@ -276,7 +276,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                         type="text"
                         value={editing.name}
                         onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], name: e.target.value } }))}
-                        className="w-full border border-blue-300 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500"
+                        className="w-full border border-blue-300 rounded px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         placeholder="Player name"
                         autoFocus
                       />
@@ -287,14 +287,14 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                           step="0.01"
                           value={editing.hdcp}
                           onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], hdcp: e.target.value } }))}
-                          className="w-20 border border-blue-300 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          className="w-20 border border-blue-300 rounded px-2 py-1 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                         />
                         <input
                           type="number"
                           placeholder="PEGT ID"
                           value={editing.pegtPlayerId}
                           onChange={(e) => setInlineEdits((prev) => ({ ...prev, [row.id!]: { ...prev[row.id!], pegtPlayerId: e.target.value } }))}
-                          className="w-24 border border-blue-300 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                          className="w-24 border border-blue-300 rounded px-2 py-1 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-blue-500 [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                           title="PEGT Player ID (from pegttour.com/players/ID — overrides auto-match)"
                         />
                         <button
@@ -326,7 +326,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                         value={row.withdrawn ? `${row.name} (withdrawn)` : row.name}
                         onChange={(e) => updateGolfer(gi, idx, "name", e.target.value)}
                         disabled={locked || !!row.withdrawn}
-                        className={`w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 disabled:bg-gray-50 disabled:cursor-not-allowed ${
+                        className={`w-full border rounded px-2 py-1 text-sm text-gray-900 focus:outline-none focus:ring-1 disabled:bg-gray-50 disabled:cursor-not-allowed ${
                           row.withdrawn
                             ? "line-through text-red-400 border-red-200"
                             : invalid
@@ -347,7 +347,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                       value={row.hdcp}
                       onChange={(e) => updateGolfer(gi, idx, "hdcp", e.target.value)}
                       disabled={locked}
-                      className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
+                      className="w-20 border border-gray-200 rounded px-2 py-1 text-sm text-gray-900 text-center focus:outline-none focus:ring-1 focus:ring-green-500 disabled:bg-gray-50 disabled:text-gray-400 disabled:cursor-not-allowed [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none"
                     />
                     {/* Per-golfer action buttons — only for saved golfers */}
                     {row.id && row.name && !locked && (
