@@ -32,5 +32,8 @@ export async function auth() {
   }
 
   if (!user) return null;
+
+  prisma.user.update({ where: { clerkId: userId }, data: { lastLoginAt: new Date() } }).catch(() => {});
+
   return { user: { id: user.id, role: user.role as string, name: user.name, email: user.email } };
 }
