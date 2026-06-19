@@ -22,7 +22,7 @@ function calculatePayouts(entries: EntryLike[]): {
   rows: PayoutRow[];
   unaccounted: number;
 } {
-  const dqList = entries.filter((e) => e.disqualified);
+  const dqList = entries.filter((e) => e.disqualified).sort((a, b) => a.entryName.localeCompare(b.entryName));
   const scored = entries.filter((e) => !e.disqualified && e.totalPoints !== null);
 
   const prizePool = scored.length * 35;
