@@ -40,6 +40,16 @@ function toTitleCase(str: string) {
     .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
+// PEGT lists this tournament under a different name than the one used
+// throughout the rest of the app (TournamentSwitcher, historical entries).
+const NAME_ALIASES: Record<string, string> = {
+  "Music City Madness Open": "Music City Open",
+};
+
+function applyAlias(name: string): string {
+  return NAME_ALIASES[name] ?? name;
+}
+
 function parse(html: string): YearGroup[] {
   const yearGroups: YearGroup[] = [];
   // Split on <h3> tags to get year sections
@@ -56,7 +66,7 @@ function parse(html: string): YearGroup[] {
     let match;
     while ((match = linkRegex.exec(section)) !== null) {
       const slug = match[1];
-      const name = toTitleCase(match[2].trim());
+      const name = applyAlias(toTitleCase(match[2].trim()));
       tournaments.push({ name, slug });
     }
 
