@@ -17,9 +17,6 @@ export default function RulesPage() {
             <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4">
               <p className="font-semibold text-gray-800 mb-1">PayPal</p>
               <p className="text-green-700 font-medium">watchez@charter.net</p>
-              <p className="text-xs text-red-600 mt-2 font-medium">
-                ⚠ Do NOT mention the pool in the subject line.
-              </p>
             </div>
             <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4">
               <p className="font-semibold text-gray-800 mb-1">Venmo</p>
@@ -27,6 +24,9 @@ export default function RulesPage() {
               <p className="text-xs text-gray-500 mt-1">Last four digits of phone: 3217</p>
             </div>
           </div>
+          <p className="text-red-600 font-bold text-base">
+            ⚠ Do not mention anything about a pool. If you need to put something in say "Thanks"
+          </p>
         </div>
       </section>
 
