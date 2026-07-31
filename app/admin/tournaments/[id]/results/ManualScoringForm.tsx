@@ -283,7 +283,7 @@ export default function ManualScoringForm({
                                 update(g.id, "coursesWon", ev.target.value)
                               }
                               disabled={e.isDNP}
-                              className="text-sm border border-gray-300 rounded px-1 py-0.5 disabled:opacity-40 disabled:bg-gray-100"
+                              className="text-sm border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-900 disabled:opacity-40 disabled:bg-gray-100"
                             >
                               {["0", "1", "2", "3", "4", "5"].map((n) => (
                                 <option key={n} value={n}>
@@ -314,7 +314,7 @@ export default function ManualScoringForm({
                                 update(g.id, "mainBracket", ev.target.value)
                               }
                               disabled={e.isDNP}
-                              className="text-sm border border-gray-300 rounded px-1 py-0.5 disabled:opacity-40 disabled:bg-gray-100"
+                              className="text-sm border border-gray-300 rounded px-1 py-0.5 bg-white text-gray-900 disabled:opacity-40 disabled:bg-gray-100"
                             >
                               <option value="0">—</option>
                               <option value="-8">1st (-8)</option>

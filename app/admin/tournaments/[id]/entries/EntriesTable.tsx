@@ -124,7 +124,7 @@ export default function EntriesTable({
                         <select
                           value={selectedUserId}
                           onChange={(e) => setSelectedUserId(e.target.value)}
-                          className="border border-gray-300 rounded px-2 py-1 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                          className="border border-gray-300 rounded px-2 py-1 text-xs bg-white text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
                         >
                           <option value="">— Unlinked —</option>
                           {users.map((u) => (
