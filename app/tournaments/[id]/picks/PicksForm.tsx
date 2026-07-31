@@ -155,8 +155,11 @@ export default function PicksForm({
         <div className="bg-white rounded-2xl shadow-md p-8">
           <div className="text-4xl mb-4">✓</div>
           <h3 className="text-xl font-bold text-gray-800 mb-2">Picks Saved!</h3>
-          <p className="text-gray-500 text-sm mb-8">
+          <p className="text-gray-500 text-sm mb-4">
             Your picks for <span className="font-medium">{activeEntry?.entryName ?? "your entry"}</span> have been saved.
+          </p>
+          <p className="text-red-600 font-bold mb-8">
+            Please Pay Your Donation ASAP - Rules list how to pay
           </p>
           <p className="text-gray-700 font-medium mb-4">Would you like to create another entry?</p>
           <div className="flex gap-3 justify-center">
