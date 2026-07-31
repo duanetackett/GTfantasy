@@ -159,7 +159,9 @@ export default function PicksForm({
             Your picks for <span className="font-medium">{activeEntry?.entryName ?? "your entry"}</span> have been saved.
           </p>
           <p className="text-red-600 font-bold mb-8">
-            Please Pay Your Donation ASAP - Rules list how to pay
+            Please pay your donation ASAP
+            <br />
+            See rules for payment instructions
           </p>
           <p className="text-gray-700 font-medium mb-4">Would you like to create another entry?</p>
           <div className="flex gap-3 justify-center">
