@@ -109,15 +109,32 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
 
     setInlineEdits((prev) => ({ ...prev, [golferId]: { ...prev[golferId], saving: true, error: "" } }));
 
+    // Resolve the PEGT roster (name → player ID) even if "Validate Names" was never clicked,
+    // so a corrected name auto-fills its PEGT Player ID without manual lookup.
+    let resolvedPlayerIds = playerIds;
+    if (!resolvedPlayerIds) {
+      const vRes = await fetch("/api/admin/players");
+      const vData = await vRes.json();
+      if (vRes.ok) {
+        setPlayers(vData.players);
+        setPlayerIds(vData.playerIds ?? null);
+        resolvedPlayerIds = vData.playerIds ?? null;
+      }
+    }
+
     const upperName = edit.name.trim().toUpperCase();
     const manualId = edit.pegtPlayerId.trim() ? parseInt(edit.pegtPlayerId.trim()) : null;
-    const autoId = playerIds?.[normalizeName(edit.name)] ?? null;
+    const autoId = resolvedPlayerIds?.[normalizeName(edit.name)] ?? null;
     const pegtId = manualId ?? autoId;
+
+    // Editing a name via the pencil implies a replacement golfer is now in this slot,
+    // so clear any prior withdrawn flag unless the caller explicitly overrides it.
+    const nextWithdrawn = withdrawnOverride ?? false;
 
     const res = await fetch(`/api/admin/tournaments/${tournament.id}/field`, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ golferId, name: upperName, hdcp: edit.hdcp, pegtPlayerId: pegtId, withdrawn: withdrawnOverride }),
+      body: JSON.stringify({ golferId, name: upperName, hdcp: edit.hdcp, pegtPlayerId: pegtId, withdrawn: nextWithdrawn }),
     });
 
     const data = await res.json();
@@ -128,7 +145,7 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
         prev.map((g) =>
           g.map((row) =>
             row.id === golferId
-              ? { ...row, name: upperName, hdcp: fmtHdcp(edit.hdcp), withdrawn: withdrawnOverride ?? row.withdrawn }
+              ? { ...row, name: upperName, hdcp: fmtHdcp(edit.hdcp), withdrawn: nextWithdrawn }
               : row
           )
         )
@@ -355,14 +372,14 @@ export default function FieldEditor({ tournament, locked = false, existingPicksC
                         <button
                           onClick={() => startInlineEdit(row)}
                           title="Edit name / handicap"
-                          className="opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition text-sm"
+                          className="px-1.5 py-1 rounded text-gray-400 hover:text-blue-600 hover:bg-blue-50 transition text-sm"
                         >
                           ✏️
                         </button>
                         <button
                           onClick={() => handleWithdrawToggle(row)}
                           title={row.withdrawn ? "Restore golfer" : "Mark as withdrawn"}
-                          className={`opacity-0 group-hover:opacity-100 px-1.5 py-1 rounded text-xs font-medium transition ${
+                          className={`px-1.5 py-1 rounded text-xs font-medium transition ${
                             row.withdrawn
                               ? "text-green-600 hover:bg-green-50"
                               : "text-red-500 hover:bg-red-50"
