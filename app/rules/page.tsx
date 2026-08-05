@@ -12,6 +12,9 @@ export default function RulesPage() {
           <p>
             Donation is <strong>$40</strong>.
           </p>
+          <p className="text-red-600 font-bold">
+            Entries without payment at 11:00 tournament time on Saturday will be deleted.
+          </p>
           <p className="font-semibold text-gray-700">If you are not attending in person, payment options are:</p>
           <div className="grid sm:grid-cols-2 gap-4">
             <div className="rounded-lg border border-gray-200 bg-gray-50 px-5 py-4">
