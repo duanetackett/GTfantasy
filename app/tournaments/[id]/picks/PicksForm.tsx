@@ -162,6 +162,8 @@ export default function PicksForm({
             Please pay your donation ASAP
             <br />
             See rules for payment instructions
+            <br />
+            Any entries without payment at 11:00 tournament time will be deleted.
           </p>
           <p className="text-gray-700 font-medium mb-4">Would you like to create another entry?</p>
           <div className="flex gap-3 justify-center">
